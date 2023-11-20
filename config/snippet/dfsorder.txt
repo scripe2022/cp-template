@@ -1,0 +1,14 @@
+    pair<vector<int>, vector<pair<int, int>>> dfsorder(int single = 0) {
+        vector<int> order;
+        vector<pair<int, int>> ts(n);
+        int cnt = 0;
+        function<void(node*)> dfs = [&](node *x) {
+            ts[ind(x)].first = cnt++;
+            order.push_back(ind(x));
+            for (auto y: x->ch) dfs(y);
+            if (!single) order.push_back(ind(x));
+            ts[ind(x)].second = single ? cnt-1 : cnt++;
+        };
+        dfs(root);
+        return {order, ts};
+    }

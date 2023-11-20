@@ -1,0 +1,36 @@
+    int centroid(int r = -1) {
+        if (~r) build(r);
+        else r = ind(root);
+        int N = vertex[r].size;
+        if (N <= 2) return r;
+        for (node *x = &vertex[r]; x; ) {
+            int maxsz = -INF;
+            node *maxnode = nullptr;
+            for (auto y: x->ch) if (y->size > maxsz) maxsz = y->size, maxnode = y;
+            if (maxsz <= N / 2) return ind(x);
+            x = maxnode;
+        }
+        return r;
+    }
+    void centroid_decomp(auto solve) {
+        auto getvs = [&](int u) -> vector<int> {
+            vector<int> vs;
+            queue<int> q; q.push(u);
+            while (!q.empty()) {
+                int x = q.front(); q.pop();
+                vs.push_back(x);
+                for (auto y: vertex[x].ch) q.push(ind(y));
+            }
+            return vs;
+        };
+        function<void(node*)> dfs = [&](node *x) -> void {
+            int c = centroid(ind(x));
+            if(c != ind(x)) build(c);
+            vector<vector<int>> vs;
+            for (auto y: vertex[c].ch) vs.push_back(getvs(ind(y)));
+            solve(c, vs);
+            removed[c] = 1, vertex[c].ch.clear();
+            for (auto v: e[c]) if (!removed[v]) dfs(&vertex[v]);
+        };
+        dfs(root);
+    }

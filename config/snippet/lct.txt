@@ -1,0 +1,107 @@
+struct lct {
+    struct node {
+        node *ch[2], *parent;
+        int inv, xorsum, val;
+    };
+    vector<node> vertex;
+    vector<vector<int>> ch;
+    int n;
+    lct(int N) {vertex.resize(n = N); }
+    int ind(node *x) {return x - &vertex[0]; }
+    int isroot(node *x) {return x->parent ? (x->parent->ch[0] != x && x->parent->ch[1] != x) : 1; }
+    void pushdown(node *x){
+        if (x->inv) {
+            if (x->ch[0]) x->ch[0]->inv ^= 1;
+            if (x->ch[1]) x->ch[1]->inv ^= 1;
+            swap(x->ch[0], x->ch[1]);
+            x->inv = 0;
+        }
+    }
+    void pushup(node *x) {
+        int lc = x->ch[0] ? x->ch[0]->xorsum : 0;
+        int rc = x->ch[1] ? x->ch[1]->xorsum : 0;
+        x->xorsum = lc ^ rc ^ x->val;
+    }
+    void rotate(node *x) {
+        node *y = x->parent, *z = y->parent;
+        int t = y->ch[1] == x;
+        if (!isroot(y)) z->ch[z->ch[1]==y] = x;
+        y->ch[t] = x->ch[!t];
+        if (x->ch[!t]) x->ch[!t]->parent = y;
+        x->ch[!t] = y, y->parent = x, x->parent = z;
+        pushup(y);
+    }
+    void splay(node *x) {
+        stack<node*> st; st.push(x);
+        for (node *i = x; !isroot(i); i = i->parent) st.push(i->parent);
+        while (!st.empty()) pushdown(st.top()), st.pop();
+        for (node *y = x->parent; y && !isroot(x); y = x->parent) {
+            if (!isroot(y)) rotate(((y->parent->ch[0]==y) ^ (y->parent->ch[0]==x)) ? x : y);
+            rotate(x);
+        }
+        pushup(x);
+    }
+    node *access(node *x){
+        node *t = nullptr;
+        for (; x; t = x, x = x->parent) splay(x), x->ch[1] = t;
+        return t;
+    }
+    int find(int u){
+        node *x = &vertex[u];
+        access(x), splay(x);
+        node *now = x;
+        while (now->ch[0]) now = now->ch[0];
+        return ind(now);
+    }
+    void makeroot(int u) {
+        node *x = &vertex[u];
+        access(x), splay(x);
+        x->inv ^= 1;
+    }
+    void link(int u, int v) {
+        makeroot(u);
+        if(find(u) != find(v)) vertex[u].parent = &vertex[v];
+    }
+    void cut(int u, int v){
+        makeroot(u);
+        access(&vertex[v]), splay(&vertex[v]);
+        if (vertex[u].parent != &vertex[v] || vertex[u].ch[1]) return;
+        vertex[u].parent = vertex[v].ch[0] = nullptr;
+    }
+    void single_modify(int u, int v) {
+        vertex[u].val = v;
+        splay(&vertex[u]);
+    }
+    node *interval(int u, int v) {
+        makeroot(u);
+        access(&vertex[v]), splay(&vertex[v]);
+        return &vertex[v];
+    }
+    node *range_query(int x, int y) {
+        return interval(x, y);
+    }
+    void graphviz_dump(int plus = 0, string filename = "graph.dot") {
+        FILE *f = fopen(filename.c_str(), "w");
+        fprintf(f, "digraph {\n");
+        rep(i, 0, n) {
+            fprintf(f, "    %lld[shape=\"record\" label=\"%lld", i+plus, i+plus);
+            node *x = &vertex[i];
+            vector<string> desired = {
+                "val=" + to_string(x->val),
+                "inv=" + to_string(x->inv),
+            };
+            for (auto s: desired) fprintf(f, " | %s", s.c_str());
+            fprintf(f, "\"];\n");
+        }
+        rep(u, 0, n) {
+            node *lc = vertex[u].ch[0], *rc = vertex[u].ch[1];
+            if (lc) fprintf(f, "    %lld -> %lld[label=\"L\"];\n", u+plus, ind(lc)+plus);
+            if (rc) fprintf(f, "    %lld -> %lld[label=\"R\"];\n", u+plus, ind(rc)+plus);
+        }
+        rep(u, 0, n) {
+            node *x = vertex[u].parent;
+            if (x) fprintf(f, "    %lld -> %lld[color=\"red\"];\n", ind(x)+plus, u+plus);
+        }
+        fprintf(f, "}\n");
+    }
+};

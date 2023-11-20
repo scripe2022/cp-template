@@ -1,0 +1,25 @@
+template <typename T> struct point2d {
+    T x, y;
+    point2d() {}
+    point2d(int X, int Y): x(X), y(Y) {}
+    point2d<T> operator+(const point2d<T> &rhs) const {
+        point2d<T> res(x + rhs.x, y + rhs.y);
+        return res;
+    }
+    point2d<T> operator-(const point2d<T> &rhs) const {
+        point2d<T> res(x - rhs.x, y - rhs.y);
+        return res;
+    }
+    bool operator==(const point2d<T> &rhs) const {
+        return x == rhs.x && y == rhs.y;
+    }
+    T dot(const point2d<T> &rhs) const {
+        return x * rhs.x + y * rhs.y;
+    }
+    T cross2(const point2d<T> &rhs) const {
+        return x * rhs.y - y * rhs.x;
+    }
+    double norm() const {
+        return sqrt(x * x + y * y);
+    }
+};

@@ -1,0 +1,99 @@
+template <class T> struct segtree {
+    struct node {
+        int l, r;
+        T val;
+        node *ch[2];
+    };
+    int cnt = 0;
+    T DEFAULT_VALUE;
+    node *newnode(int l, int r) {
+        node *x = (l==r) ? &datalist[l] : &datalist[cnt++];
+        x->l = l, x->r = r;
+        x->ch[0] = x->ch[1] = nullptr;
+        x->size = r - l + 1;
+        return x;
+    }
+    vector<int> a;
+    vector<node> datalist;
+    node *root;
+    segtree(vector<int> arr) {
+        cnt = sz(arr);
+        a = arr, build();
+    }
+    void pushup(node *x) {
+        if (!x) return;
+        if (!x->ch[0] && !x->ch[1]) return;
+        if (x->ch[0] && x->ch[1]) x->val = x->ch[0]->val + x->ch[1]->val;
+        else x->val = x->ch[!x->ch[0]]->val;
+    }
+    T query(int ql, int qr) {
+        if (qr - ql < 10) {
+            T res = DEFAULT_VALUE;
+            rep(i, ql, qr+1) res = res + datalist[i].val;
+            return res;
+        }
+        function<T(node*)> dfs = [&](node *x) -> T {
+            if (ql > x->r || qr < x->l) return DEFAULT_VALUE;
+            if (x->l >= ql && x->r <= qr) return x->val;
+            return dfs(x->ch[0]) + dfs(x->ch[1]);
+        };
+        return dfs(root);
+    }
+    template <typename U> void modify(int q, U val) {
+        function<void(node*)> dfs = [&](node *x) -> void {
+            if (q > x->r || q < x->l) return;
+            if (x->l >= q && x->r <= q) {
+                x->val.update(val);
+                return;
+            }
+            dfs(x->ch[0]), dfs(x->ch[1]);
+            pushup(x);
+        };
+        dfs(root);
+    }
+    void build() {
+        datalist.resize(sz(a) * 2);
+        function<node*(int, int)> dfs = [&](int l, int r) {
+            node *x = newnode(l, r);
+            if (r > l) x->ch[0] = dfs(l, (l+r) >> 1), x->ch[1] = dfs(((l+r)>>1) + 1, r);
+            else x->val.set(a[l]);
+            pushup(x);
+            return x;
+        };
+        root = dfs(0, sz(a)-1);
+    }
+    void graphviz_dump(string filename = "graph.dot") {
+        FILE *f = fopen(filename.c_str(), "w");
+        fprintf(f, "digraph {\n");
+        rep(i, 0, cnt) {
+            node *x = &datalist[i];
+            fprintf(f, "    %lld[label=\"(%lld, %lld)", i, x->l, x->r);
+            vector<string> desired = {
+                // "sz=" + to_string(x->R - x->L + 1),
+            };
+            for (auto s: desired) fprintf(f, " | %s", s.c_str());
+            fprintf(f, "\" shape=\"record\"];\n");
+        }
+        rep(i, 0, cnt) {
+            node *x = &datalist[i];
+            if (x->ch[0]) fprintf(f, "    %lld -> %ld;\n", i, x->ch[0] - &datalist[0]);
+            if (x->ch[1]) fprintf(f, "    %lld -> %ld;\n", i, x->ch[1] - &datalist[0]);
+        }
+        fprintf(f, "}\n");
+    }
+};
+    // struct value {
+    //     int maxv = -INF;
+    //     int size = 0;
+    //     value operator+(const value &other) const {
+    //         value res;
+    //         res.maxv = max(maxv, other.maxv);
+    //         return res;
+    //     }
+    //     void set(int rhs) {
+    //         maxv = rhs;
+    //     }
+    //     void update(int val) {
+    //         cmax(maxv, val);
+    //     }
+    // };

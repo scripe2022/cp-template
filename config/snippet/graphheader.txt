@@ -1,0 +1,26 @@
+struct graph {
+    struct node {
+        int u, v, w;
+        int idx;
+        bool operator<(const node &other) const {return w < other.w; }
+        bool operator==(const node &other) const {return v == other.v && w == other.w; }
+    };
+    vector<vector<node>> e;
+    vector<vector<int>> invid;
+    node &inv(node &edge) {return e[edge.v][invid[edge.u][edge.idx]]; }
+
+    int n;
+    bool directed;
+    graph(int V, bool D = 0) {
+        n = V;
+        e.resize(n), invid.resize(n);
+        directed = D;
+    }
+    void add_edge(int u, int v, int w = 1, int wb = 1) {
+        e[u].push_back(node{u, v, w, sz(e[u])});
+        if (!directed) {
+            e[v].push_back(node{v, u, wb, sz(e[v])});
+            invid[u].push_back(sz(e[v]) - 1);
+            invid[v].push_back(sz(e[u]) - 1);
+        }
+    }

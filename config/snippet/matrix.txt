@@ -1,0 +1,33 @@
+    struct matrix {
+        vector<vector<int>> val;
+        int row, col;
+        int modp;
+        matrix(int r, int c, int m = NaN) : row(r), col(c), modp(m) {
+            val.resize(row, vector<int>(col, 0));
+        }
+        matrix operator*(const matrix &rhs) const {
+            auto lhs = *this;
+            matrix res(lhs.row, rhs.col, modp);
+            rep(i, 0, lhs.row) {
+                rep(k, 0, lhs.col) {
+                    rep(j, 0, rhs.col) {
+                        res.val[i][j] += lhs.val[i][k] * rhs.val[k][j];
+                        if (modp != NaN) res.val[i][j] %= modp;
+                    }
+                }
+            }
+            return res;
+        }
+        matrix pow(const int N) {
+            assert(row == col);
+            if (N == 0) {
+                matrix res(row, col, modp);
+                rep(i, 0, row) res.val[i][i] = 1;
+                return res;
+            }
+            if (N == 1) return *this;
+            matrix block = this->pow(N >> 1);
+            if (N & 1) return block * block * *this;
+            else return block * block;
+        }
+    };

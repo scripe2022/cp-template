@@ -1,0 +1,18 @@
+    void dijkstra(int s, vector<int> &dis) {
+        dis.resize(n, INF);
+        vector<bool> vis(n, 0);
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+        dis[s] = 0, pq.push({0, s});
+        while (!pq.empty()) {
+            int u = pq.top().second; pq.pop();
+            if (vis[u]) continue;
+            vis[u] = 1;
+            for (auto edge: e[u]) {
+                int v = edge.v, w = edge.w;
+                if (dis[v] > dis[u] + w) {
+                    dis[v] = dis[u] + w;
+                    pq.push({dis[v], v});
+                }
+            }
+        }
+    }

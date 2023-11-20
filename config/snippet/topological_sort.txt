@@ -1,0 +1,15 @@
+    int topo(vector<int> &vs) {
+        vector<int> din(n, 0);
+        for (auto es: e) for (auto edge: es) ++din[edge.v];
+        queue<int> q;
+        rep(i, 0, n) if (!din[i]) q.push(i);
+        vs.clear();
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            vs.push_back(u);
+            for (auto &edge: e[u]) {
+                if (!--din[edge.v]) q.push(edge.v);
+            }
+        }
+        return sz(vs) == n;
+    }

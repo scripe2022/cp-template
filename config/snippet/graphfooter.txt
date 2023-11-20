@@ -1,0 +1,17 @@
+    void graphviz_dump(int plus = 0, string filename = "graph.dot") {
+        ofstream gf; gf.open(filename);
+        gf << (directed ? "digraph" : "graph") << " {\n";
+        gf << "    "; rep(i, 0, n) gf << i+plus << " ;"[i==n-1]; gf << endl;
+        string notation = directed ? " -> " : " -- ";
+        bool weighted = 0;
+        for (auto es: e) for (auto edge: es) if (edge.w != 1) weighted = 1;
+        rep(u, 0, n) {
+            for (auto edge: e[u]) {
+                int v = edge.v, w = edge.w;
+                if (!directed && u > v) continue;
+                gf << "    " << u+plus << notation << v+plus << (weighted ? " [label=\"" + to_string(w) + "\"];\n" : ";\n");
+            }
+        }
+        gf << "}\n";
+    }
+};

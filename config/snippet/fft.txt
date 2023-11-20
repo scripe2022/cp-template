@@ -1,0 +1,38 @@
+    template <typename T> vector<T> fft(vector<T> const &a, vector<T> const &b) {
+        function<void(vector<complex<double>>&)> bitrev = [](vector<complex<double>> &f) {
+            int n = f.size();
+            int i = 0;
+            for (int j = 1; j < n-1; ++j) {
+                for (int k = n>>1; k > (i ^= k); k >>= 1);
+                if (j < i) swap(f[i], f[j]);
+            }
+        };
+        function<void(vector<complex<double>>&, bool)> solve = [&bitrev](vector<complex<double>> &f, bool inv) -> void {
+            int n = f.size();
+            bitrev(f);
+            for (int len = 2; len <= n; len <<= 1) {
+                double ang = 2 * M_PI / len * (inv ? -1 : 1);
+                complex<double> wlen(cos(ang), sin(ang));
+                for (int i = 0; i < n; i += len) {
+                    complex<double> w(1);
+                    for (int j = 0; j < len / 2; j++) {
+                        complex<double> u = f[i+j], v = f[i+j+len/2] * w;
+                        f[i+j] = u + v;
+                        f[i+j+len/2] = u - v;
+                        w *= wlen;
+                    }
+                }
+            }
+            if (inv) for (complex<double> &x: f) x /= n;
+        };
+        vector<complex<double>> fa(a.begin(), a.end()), fb(b.begin(), b.end());
+        int n = 1;
+        while (n < (int)(a.size() + b.size())) n <<= 1;
+        fa.resize(n), fb.resize(n);
+        solve(fa, 0), solve(fb, 0);
+        for (int i = 0; i < n; i++) fa[i] *= fb[i];
+        solve(fa, 1);
+        vector<int> res(n);
+        for (int i = 0; i < n; i++) res[i] = round(fa[i].real());
+        return res;
+    }

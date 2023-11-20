@@ -1,0 +1,63 @@
+struct trie {
+    int base, N;
+    struct node {
+        int isword, c;
+        vector<node*> ch;
+        node *parent = nullptr;
+    };
+    node *root;
+    vector<node> datalist;
+    int total = 0;
+    node *newnode(int c, node *p = nullptr) {
+        node *x = &datalist[total++];
+        x->ch.resize(N, 0);
+        x->c = c;
+        x->parent = p;
+        return x;
+    }
+    trie(int M, char L = 0, char R = 127) {
+        base = L;
+        N = R - L + 1;
+        datalist.resize(M + 2);
+        root = newnode(-1);
+    }
+    void insert(string s) {
+        node *x = root;
+        for (char c: s) {
+            if (!x->ch[c - base]) {
+                x->ch[c - base] = newnode(c - base, x);
+            }
+            x = x->ch[c - base];
+        }
+        x->isword = 1;
+    }
+    string get(node *x) {
+        vector<char> v;
+        while (x->parent) {
+            v.push_back(x->c + base);
+            x = x->parent;
+        }
+        reverse(v.begin(), v.end());
+        string res(v.begin(), v.end());
+        return res;
+    }
+    void graphviz_dump(string filename = "graph.dot") {
+        FILE *f = fopen(filename.c_str(), "w");
+        fprintf(f, "digraph {\n");
+        rep(i, 0, total) {
+            node *x = &datalist[i];
+            fprintf(f, "    %lld[label=\"%c\" color=\"%s\"];\n", i, (x->c >= 0 ? char(x->c + base) : ' '), x->isword ? "red" : "black");
+        }
+        queue<node*> q; q.push(root);
+        while (!q.empty()) {
+            node *x = q.front(); q.pop();
+            rep(i, 0, N) {
+                if (x->ch[i]) {
+                    fprintf(f, "    %ld -> %ld;\n", x - &datalist[0], x->ch[i] - &datalist[0]);
+                    q.push(x->ch[i]);
+                }
+            }
+        }
+        fprintf(f, "}\n");
+    }
+};

@@ -1,0 +1,13 @@
+    pair<int, pair<int, int>> diameter() {
+        int maxd = -INF, s = -1, t = -1;
+        vector<int> vis(n, 0);
+        function<void(int, int, int&)> dfs = [&](int u, int dis, int &st) -> void {
+            vis[u] = 1;
+            if (dis > maxd) maxd = dis, st = u;
+            for (auto v: e[u]) if (!vis[v]) dfs(v, dis+1, st);
+        };
+        dfs(ind(root), 0, s);
+        maxd = -INF, fill(vis.begin(), vis.end(), 0);
+        dfs(s, 0, t);
+        return {maxd, {s, t}};
+    }

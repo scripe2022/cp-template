@@ -1,0 +1,30 @@
+    int eulerian_circuit(int s, vector<int> &route, int circuit = 1) {
+        vector<int> din(n, 0), dout(n, 0);
+        int E = 0;
+        rep(u, 0, n) for (auto &edge: e[u]) {
+            if (directed) ++din[edge.v], ++dout[u];
+            else din[edge.v] += edge.v > u, dout[u] += edge.v > u;
+            E += directed ? 1 : edge.v > u;
+        }
+        int error = 0;
+        rep(i, 0, n) error += directed ? abs(din[i] - dout[i]) : (din[i] + dout[i]) & 1;
+        if ((circuit && error) || (!circuit && error > 2)) return 0;
+        vector<vector<int>> vis(n);
+        rep(i, 0, n) vis[i].assign(sz(e[i]), 0);
+        vector<int> cur(n, 0);
+        function<void(int)> dfs = [&](int u) {
+            for (; cur[u] < sz(e[u]); ++cur[u]) {
+                int i = cur[u];
+                int v = e[u][i].v;
+                if (vis[u][i]) continue;
+                vis[u][i] = 1;
+                if (!directed) vis[v][inv(e[u][i]).idx] = 1;
+                dfs(v);
+            }
+            route.push_back(u);
+        };
+        dfs(s);
+        if (sz(route) != E+1) return 0;
+        reverse(route.begin(), route.end());
+        return 1;
+    }

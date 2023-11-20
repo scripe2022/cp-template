@@ -1,0 +1,112 @@
+struct sam {
+    struct node {
+        map<char, node*> next;
+        node *link;
+        int minlen, maxlen;
+        int suf = 0;
+        int endpos;
+        int tot = 0, size = 0;
+    };
+    vector<node> datalist;
+    int total = 0;
+    node *last = nullptr, *root = nullptr;
+    string s;
+
+    node *newnode(int length = 0, node *p = nullptr) {
+        node *x = &datalist[total++];
+        x->minlen = 0;
+        x->maxlen = length;
+        x->link = p;
+        return x;
+    }
+    sam(string str) {
+        s = str;
+        datalist.resize(s.size() * 2);
+        root = last = newnode();
+        root->endpos = 0;
+        for (int i = 0; i < sz(s); ++i) {
+            char c = s[i];
+            node *cur = newnode(i+1, root);
+            cur->endpos = i+1;
+            cur->tot = 1;
+            node *parent = last;
+            while (parent && !parent->next.count(c)) {
+                parent->next[c] = cur;
+                parent = parent->link;
+            }
+            if (parent) {
+                node *q = parent->next[c];
+                if (parent->maxlen + 1 == q->maxlen) cur->link = q;
+                else {
+                    node *nq = newnode(parent->maxlen + 1, q->link);
+                    nq->endpos = i+1;
+                    nq->next = q->next;
+                    q->link = cur->link = nq;
+                    while (parent && parent->next[c] == q) {
+                        parent->next[c] = nq;
+                        parent = parent->link;
+                    }
+                }
+            }
+            last = cur;
+        }
+        // minlen
+        queue<node*> q; q.push(root);
+        while (!q.empty()) {
+            node *x = q.front(); q.pop();
+            for (auto [c, p]: x->next) {
+                if (p->minlen) continue;
+                p->minlen = x->minlen + 1;
+                q.push(p);
+            }
+        }
+        // is suffix
+        for (node *x = last; x && x != root; x = x->link) x->suf = 1;
+        // size of endpos set
+        vector<vector<node*>> e(total);
+        rep(i, 0, total) if (datalist[i].link) e[datalist[i].link - &datalist[0]].push_back(&datalist[i]);
+        function<void(int)> dfs_tot = [&](int x) {
+            for (auto y: e[x]) {
+                dfs_tot(y - &datalist[0]);
+                datalist[x].tot += datalist[y - &datalist[0]].tot;
+            }
+        };
+        dfs_tot(0);
+        // num of strings
+        function<int(node*)> dfs_size = [&](node *x) {
+            if (x->size) return x->size;
+            x->size = x==root ? 0 : 1;
+            for (auto [c, p]: x->next) x->size += dfs_size(p);
+            return x->size;
+        };
+        dfs_size(root);
+    }
+    string getstr(node *x) {
+        return s.substr(x->endpos - x->maxlen, x->maxlen);
+    }
+    void graphviz_dump(string filename = "graph.dot") {
+        FILE *f = fopen(filename.c_str(), "w");
+        fprintf(f, "digraph {\n");
+        rep(i, 0, total) {
+            node *x = &datalist[i];
+            fprintf(f, "    %lld[%s shape=\"record\" label=\"", i, x->suf ? "color=\"red\"" : "");
+            vector<string> desired = {
+                "min=" + to_string(x->minlen),
+                "max=" + to_string(x->maxlen),
+                "endpos=" + to_string(x->endpos),
+                "sz=" + to_string(x->size)
+            };
+            rep(j, 0, sz(desired)) {
+                fprintf(f, "%s%s", j ? " | " : "", desired[j].c_str());
+            }
+            fprintf(f, "\"];\n");
+        }
+        rep(i, 0, total) {
+            for (auto [c, p]: datalist[i].next) {
+                fprintf(f, "    %lld -> %ld [label=\"%c\"];\n", i, p - &datalist[0], c);
+            }
+        }
+        // rep(i, 0, total) if (datalist[i].link) fprintf(f, "    %lld -> %ld [color=\"blue\" style=\"dashed\"];\n", i, datalist[i].link - &datalist[0]);
+        fprintf(f, "}\n");
+    }
+};

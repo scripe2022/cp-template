@@ -1,0 +1,54 @@
+template <typename T> struct polygon2d {
+    vector<point2d<T>> p;
+    polygon2d() {}
+    polygon2d(vector<point2d<T>> a): p(a) {}
+    void add(const point2d<T> q) {p.push_back(q); }
+    T area() const {
+        T res = 0;
+        rep(i, 0, p.size()) {
+            int j = (i + 1) % p.size();
+            res += p[i].cross2(p[j]);
+        }
+        return abs(res);
+    }
+    int in(const point2d<T> &q) const {
+        line2d l(q, point2d<T>((T)(1e9+7), q.y));
+        int cnt = 0;
+        rep(i, 0, sz(p)) {
+            point2d<T> a = p[i], b = p[(i+1) % sz(p)];
+            line2d m(a, b);
+            if (m.on(q)) return 0;
+            if (!m.intersect(l)) continue;
+            int maxy = max(a.y, b.y);
+            if (maxy > q.y) ++cnt;
+        }
+        return cnt&1 ? 1 : -1;
+    }
+    vector<point2d<T>> convex_hull() {
+        sort(p.begin(), p.end(), [](const point2d<T> &a, const point2d<T> &b) {
+            return a.x < b.x || (a.x == b.x && a.y < b.y);
+        });
+        vector<int> used(p.size(), 0);
+        stack<int> s; s.push(0);
+        rep(i, 1, sz(p)) {
+            while (sz(s) >= 2) {
+                int j = s.top(); s.pop(); int k = s.top();
+                if ((p[j] - p[k]).cross2(p[i] - p[j]) <= 0) {s.push(j); break; }
+                used[j] = 0;
+            }
+            s.push(i), used[i] = 1;
+        }
+        for (int i = sz(p)-1; i >= 0; --i) {
+            if (used[i]) continue;
+            while (sz(s) >= 2) {
+                int j = s.top(); s.pop(); int k = s.top();
+                if ((p[j] - p[k]).cross2(p[i] - p[j]) <= 0) {s.push(j); break; }
+                used[j] = 0;
+            }
+            s.push(i), used[i] = 1;
+        }
+        vector<point2d<T>> res;
+        rep(i, 0, sz(p)) if (used[i]) res.push_back(p[i]);
+        return res;
+    }
+};

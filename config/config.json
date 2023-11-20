@@ -1,0 +1,350 @@
+[
+    {
+        "id": "graph",
+        "label": "Basic Graph",
+        "children": [
+            {
+                "id": "dfs",
+                "label": "Dfs"
+            },
+            {
+                "id": "bfs",
+                "label": "Bfs"
+            },
+            {
+                "id": "cc",
+                "label": "Connected Component"
+            },
+            {
+                "id": "dijkstra",
+                "label": "Dijkstra"
+            },
+            {
+                "id": "dijkstra_ksp",
+                "label": "K-th Shortest Path O(nklog)"
+            },
+            {
+                "id": "spfa",
+                "label": "SPFA"
+            },
+            {
+                "id": "floyd",
+                "label": "Floyd"
+            },
+            {
+                "id": "kruskal",
+                "label": "Kruskal"
+            },
+            {
+                "id": "topological_sort",
+                "label": "Topological Sort"
+            },
+            {
+                "id": "tarjan_scc",
+                "label": "Strongly Connected Component"
+            },
+            {
+                "id": "contraction",
+                "label": "Contraction"
+            },
+            {
+                "id": "cutvertices",
+                "label": "Cut Vertices"
+            },
+            {
+                "id": "bridge",
+                "label": "Bridge"
+            },
+            {
+                "id": "2sat",
+                "label": "2-SAT"
+            },
+            {
+                "id": "eulerian_tour",
+                "label": "Eulerian Tour O(n+m)"
+            }
+        ]
+    },
+    {
+        "id": "network",
+        "label": "Advanced Graph",
+        "children": [
+            {
+                "id": "maxflow",
+                "label": "Maxflow (Dinic)"
+            },
+            {
+                "id": "mcmf",
+                "label": "Mincost Maxflow"
+            }
+        ]
+    },
+    {
+        "id": "tree",
+        "label": "Tree",
+        "children": [
+            {
+                "id": "diameter",
+                "label": "Diameter"
+            },
+            {
+                "id": "ssp",
+                "label": "Shortest Path"
+            },
+            {
+                "id": "ancestor",
+                "label": "Get Ancestor"
+            },
+            {
+                "id": "lca",
+                "label": "Lowest Common Ancestor"
+            },
+            {
+                "id": "dfsorder",
+                "label": "DFS Order"
+            },
+            {
+                "id": "hld",
+                "label": "Heavy Light Decomposition"
+            },
+            {
+                "id": "dsuontree",
+                "label": "DSU on Tree"
+            },
+            {
+                "id": "centroid",
+                "label": "Centroid"
+            },
+            {
+                "id": "centroid_decomp",
+                "label": "Centroid Decomposition"
+            }
+        ]
+    },
+    {
+        "id": "data_structure",
+        "label": "Data Structure",
+        "children": [
+            {
+                "id": "dsu",
+                "label": "Disjoint Set Union"
+            },
+            {
+                "id": "stmin",
+                "label": "Minimum Sparse Table"
+            },
+            {
+                "id": "stmax",
+                "label": "Maximum Sparse Table"
+            },
+            {
+                "id": "bitree",
+                "label": "Binary Indexed Tree"
+            },
+            {
+                "id": "bitree2d",
+                "label": "Binary Indexed Tree 2D"
+            },
+            {
+                "id": "segtreesingle",
+                "label": "Segment Tree (single)"
+            },
+            {
+                "id": "segtree",
+                "label": "Segment Tree (lazytag)"
+            },
+            {
+                "id": "segtree2d",
+                "label": "Segment Tree 2D"
+            },
+            {
+                "id": "splay",
+                "label": "Splay Tree"
+            },
+            {
+                "id": "treap",
+                "label": "Treap"
+            },
+            {
+                "id": "lichaomin",
+                "label": "Lichao Segment Tree (Min)"
+            },
+            {
+                "id": "lichaomax",
+                "label": "Lichao Segment Tree (Max)"
+            },
+            {
+                "id": "mos",
+                "label": "Mo's Algorithm"
+            },
+            {
+                "id": "lct",
+                "label": "Link-Cut Tree"
+            }
+        ]
+    },
+    {
+        "id": "math",
+        "label": "Mathematics",
+        "children": [
+            {
+                "id": "modinv",
+                "label": "Modular Inverse"
+            },
+            {
+                "id": "modcomb",
+                "label": "Modular Combination"
+            },
+            {
+                "id": "modint",
+                "label": "Static Modular Integer"
+            },
+            {
+                "id": "modint_dynamic",
+                "label": "Dynamic Modular Integer"
+            },
+            {
+                "id": "powmod",
+                "label": "Power Modulo"
+            },
+            {
+                "id": "prime_sieve",
+                "label": "Sieve of Prime"
+            },
+            {
+                "id": "mu_sieve",
+                "label": "Sieve of Mobius Function"
+            },
+            {
+                "id": "matrix",
+                "label": "Matrix"
+            },
+            {
+                "id": "fft",
+                "label": "FFT"
+            }
+        ]
+    },
+    {
+        "id": "str",
+        "label": "String",
+        "children": [
+            {
+                "id": "strhash",
+                "label": "String Hash"
+            },
+            {
+                "id": "trie",
+                "label": "Trie"
+            },
+            {
+                "id": "prefixfunction",
+                "label": "Prefix Function"
+            },
+            {
+                "id": "zfunction",
+                "label": "Z Function"
+            },
+            {
+                "id": "kmp",
+                "label": "KMP"
+            },
+            {
+                "id": "sa",
+                "label": "Suffix Array (sa-is)"
+            },
+            {
+                "id": "manacher",
+                "label": "Manacher"
+            },
+            {
+                "id": "acauto",
+                "label": "AC Automaton"
+            },
+            {
+                "id": "sam",
+                "label": "Suffix Automaton"
+            }
+        ]
+    },
+    {
+        "id": "geometry",
+        "label": "Geometry",
+        "children": [
+            {
+                "id": "point",
+                "label": "Point & Vector"
+            },
+            {
+                "id": "point2d",
+                "label": "Point 2D"
+            },
+            {
+                "id": "line2d",
+                "label": "Line 2D"
+            },
+            {
+                "id": "polygon2d",
+                "label": "Polygon 2D"
+            },
+            {
+                "id": "convexhull2d",
+                "label": "Convex Hull 2D"
+            }
+        ]
+    },
+    {
+        "id": "dp",
+        "label": "Dynamic Programming",
+        "children": [
+            {
+                "id": "chtincinc",
+                "label": "Slope Optimization (k↑, x↑)"
+            },
+            {
+                "id": "monotonicity",
+                "label": "Monotonicity Optimization"
+            }
+        ]
+    },
+    {
+        "id": "helper",
+        "label": "Helper Functions",
+        "children": [
+            {
+                "id": "corcomp",
+                "label": "Coordinate Compression"
+            },
+            {
+                "id": "permutation2int",
+                "label": "Permutation to Integer"
+            },
+            {
+                "id": "int2permutation",
+                "label": "Integer to Permutation"
+            }
+        ]
+    },
+    {
+        "id": "env",
+        "label": "Environment",
+        "children": [
+            {
+                "id": "debug",
+                "label": "Debug library"
+            },
+            {
+                "id": "makefile",
+                "label": "Makefile"
+            },
+            {
+                "id": "updatemd5",
+                "label": "updatemd5"
+            },
+            {
+                "id": "testsh",
+                "label": "test.sh"
+            }
+        ]
+    }
+]

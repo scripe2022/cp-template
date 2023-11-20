@@ -1,0 +1,14 @@
+    int centroid(int r = -1) {
+        if (~r) build(r);
+        else r = ind(root);
+        int N = vertex[r].size;
+        if (N <= 2) return r;
+        for (node *x = &vertex[r]; x; ) {
+            int maxsz = -INF;
+            node *maxnode = nullptr;
+            for (auto y: x->ch) if (y->size > maxsz) maxsz = y->size, maxnode = y;
+            if (maxsz <= N / 2) return ind(x);
+            x = maxnode;
+        }
+        return r;
+    }

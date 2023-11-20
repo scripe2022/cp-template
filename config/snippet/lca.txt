@@ -1,0 +1,19 @@
+    vector<vector<int>> hp;
+    vector<vector<int>> ancestor() {
+        vector<vector<int>> p(n, vector<int>(log2(n) + 1));
+        rep(i, 0, n) p[i][0] = vertex[i].parent ? ind(vertex[i].parent) : -1;
+        rep(j, 1, log2(n)+1) rep(i, 0, n) p[i][j] = ~p[i][j-1] ? p[p[i][j-1]][j-1] : -1;
+        return p;
+    }
+    int lca(int u, int v) {
+        if (!hp.size()) hp = ancestor();
+        if (vertex[u].depth < vertex[v].depth) swap(u, v);
+        for (int k = log2(n); k >= 0; --k) if (vertex[u].depth - (1<<k) >= vertex[v].depth) u = hp[u][k];
+        if (u == v) return u;
+        for (int k = log2(n); k >= 0; --k) {
+            if (hp[u][k] != hp[v][k]) {
+                u = hp[u][k], v = hp[v][k];
+            }
+        }
+        return hp[u][0];
+    }

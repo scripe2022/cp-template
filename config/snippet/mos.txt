@@ -1,0 +1,34 @@
+struct mos {
+    int S = 0;
+    struct interval {
+        int l, r, id;
+    };
+    vector<interval> q;
+    void add_query(int l, int r) {
+        q.push_back({l, r, sz(q)});
+    }
+    auto run(auto brute, auto inc, auto dec, auto get) {
+        S = (int)sqrt(sz(q));
+        sort(q.begin(), q.end(), [&](const interval &a, const interval &b) {
+            if (a.l/S != b.l/S) return a.l < b.l;
+            if ((a.l/S) & 1) return a.r < b.r;
+            return a.r > b.r;
+        });
+        vector<int> res(sz(q));
+        int cl = 0, cr = 0;
+        rep(_, 0, sz(q)) {
+            int l = q[_].l, r = q[_].r, id = q[_].id;
+            if (!(_ % S)) {
+                brute(cl = l, cr = r);
+            }
+            else {
+                while (cl < l) dec(cl++);
+                while (cl > l) inc(--cl);
+                while (cr < r) inc(++cr);
+                while (cr > r) dec(cr--);
+            }
+            res[id] = get();
+        }
+        return res;
+    }
+};

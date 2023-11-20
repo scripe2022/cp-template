@@ -1,0 +1,13 @@
+    vector<vector<int>> cc() {
+        vector<vector<int>> res;
+        vector<bool> vis(n, 0);
+        function<void(int)> dfs = [&](int u) {
+            vis[u] = 1;
+            res.back().push_back(u);
+            for (auto &edge: e[u]) if (!vis[edge.v]) dfs(edge.v);
+        };
+        rep(i, 0, n) {
+            if (!vis[i]) res.push_back(vector<int>()), dfs(i);
+        }
+        return res;
+    }

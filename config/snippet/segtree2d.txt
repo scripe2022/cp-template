@@ -1,0 +1,120 @@
+template <class T> struct segtree2d {
+    struct node {
+        pair<int, int> l, r;
+        T val;
+        node *ch[2][2];
+    };
+    int cnt = 0;
+    T DEFAULT_VALUE;
+    node *newnode(pair<int, int> l, pair<int, int> r) {
+        node *x = &datalist[cnt++];
+        x->l = l, x->r = r;
+        x->ch[0][0] = x->ch[0][1] = x->ch[1][0] = x->ch[1][1] = nullptr;
+        x->val.L = l, x->val.R = r;
+        return x;
+    }
+    vector<vector<int>> a;
+    vector<node> datalist;
+    node *root;
+    segtree(vector<vector<int>> arr) {
+        a = arr, build();
+    }
+    void pushup(node *x) {
+        if (!x) return;
+        if (!x->ch[0][0] && !x->ch[0][1] && !x->ch[1][0] && !x->ch[1][1]) return;
+        rep(i, 0, 2) rep(j, 0, 2) if (x->ch[i][j]) pushdown(x->ch[i][j]);
+        x->val = DEFAULT_VALUE;
+        rep(i, 0, 2) rep(j, 0, 2) if (x->ch[i][j]) x->val = x->val + x->ch[i][j]->val;
+    }
+    void pushdown(node *x) {
+        if (!x) return;
+        rep(i, 0, 2) rep(j, 0, 2) if (x->ch[i][j]) x->val.pushdown(x->ch[i][j]->val, {i, j});
+        x->val.clear();
+    }
+    T query(pair<int, int> ql, pair<int, int> qr) {
+        function<T(node*)> dfs = [&](node *x) -> T {
+            if (!x) return DEFAULT_VALUE;
+            if (ql.first > x->r.first || qr.first < x->l.first || ql.second > x->r.second || qr.second < x->l.second) return DEFAULT_VALUE;
+            pushdown(x);
+            if (x->l.first >= ql.first && x->l.second >= ql.second && x->r.first <= qr.first && x->r.second <= qr.second) return x->val;
+            return dfs(x->ch[0][0]) + dfs(x->ch[0][1]) + dfs(x->ch[1][0]) + dfs(x->ch[1][1]);
+        };
+        return dfs(root);
+    }
+    template <typename U> void modify(U val, pair<int, int> ql, pair<int, int> qr) {
+        function<void(node*)> dfs = [&](node *x) -> void {
+            if (!x) return;
+            if (ql.first > x->r.first || qr.first < x->l.first || ql.second > x->r.second || qr.second < x->l.second) return;
+            pushdown(x);
+            if (x->l.first >= ql.first && x->l.second >= ql.second && x->r.first <= qr.first && x->r.second <= qr.second) {
+                x->val.update(val, ql, qr);
+                return;
+            }
+            rep(i, 0, 2) rep(j, 0, 2) dfs(x->ch[i][j]);
+            pushup(x);
+        };
+        dfs(root);
+    }
+    void build() {
+        datalist.resize(sz(a) * sz(a[0]) * 2);
+        function<node*(pair<int, int>, pair<int, int>)> dfs = [&](pair<int, int> l, pair<int, int> r) {
+            if (l.first > r.first || l.second > r.second) return (node*)nullptr;
+            node *x = newnode(l, r);
+            if (r != l) {
+                pair<int, int> mid = {(l.first + r.first) >> 1, (l.second + r.second) >> 1};
+                x->ch[0][0] = dfs({l.first, l.second}, {mid.first, mid.second});
+                x->ch[0][1] = dfs({l.first, mid.second+1}, {mid.first, r.second});
+                x->ch[1][0] = dfs({mid.first+1, l.second}, {r.first, mid.second});
+                x->ch[1][1] = dfs({mid.first+1, mid.second+1}, {r.first, r.second});
+            }
+            else x->val.set(a[l.first][l.second]);
+            pushup(x);
+            return x;
+        };
+        root = dfs({0, 0}, {sz(a)-1, sz(a[0])-1});
+    }
+    void graphviz_dump(string filename = "graph.dot") {
+        FILE *f = fopen(filename.c_str(), "w");
+        fprintf(f, "digraph {\n");
+        rep(id, 0, cnt) {
+            node *x = &datalist[id];
+            fprintf(f, "    %lld[label=\"(%lld, %lld), (%lld, %lld)", id, x->l.first, x->l.second, x->r.first, x->r.second);
+            vector<string> desired = {
+                "sum=" + to_string(x->val.sum),
+                // "tag=" + (x->val.tag==NaN ? "NaN" : to_string(x->val.tag)),
+            };
+            for (auto s: desired) fprintf(f, " | %s", s.c_str());
+            fprintf(f, "\" shape=\"record\"];\n");
+        }
+        rep(id, 0, cnt) {
+            node *x = &datalist[id];
+            rep(i, 0, 2) rep(j, 0, 2) if (x->ch[i][j]) fprintf(f, "    %lld -> %ld;\n", id, x->ch[i][j] - &datalist[0]);
+        }
+        fprintf(f, "}\n");
+    }
+};
+    // struct value {
+    //     int sum = 0, tag = NaN;
+    //     pair<int, int> L, R;
+    //     value operator+(const value &other) const {
+    //         value res;
+    //         res.sum = sum + other.sum;
+    //         res.L = L, res.R = other.R;
+    //         return res;
+    //     }
+    //     void set(int rhs) {
+    //         this->sum = rhs;
+    //     }
+    //     void update(int val, pair<int, int> ql = {0, 0}, pair<int, int> qr = {0, 0}) {
+    //         tag = val;
+    //     }
+    //     void pushdown(value &child, pair<int, int> rc) {
+    //         if (tag == NaN) return;
+    //         child.update(tag, child.L, child.R);
+    //     }
+    //     void clear() {
+    //         if (tag == NaN) return;
+    //         sum = (R.first - L.first + 1) * (R.second - L.second + 1) * tag;
+    //         tag = NaN;
+    //     }
+    // };

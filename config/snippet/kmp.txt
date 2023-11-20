@@ -1,0 +1,18 @@
+    vector<int> prefix_function(string s) {
+        vector<int> pi(s.length(), 0);
+        rep(i, 1, s.length()) {
+            int j = pi[i-1];
+            while (j && s[i] != s[j]) j = pi[j-1];
+            pi[i] = j + (s[i] == s[j]);
+        }
+        return pi;
+    }
+    vector<int> kmp(string s, string p) {
+        string t = p + "#" + s;
+        vector<int> pi = prefix_function(t);
+        vector<int> pos;
+        rep(i, p.length() + 1, t.length()) {
+            if (pi[i] == (int)p.length()) pos.push_back(i - 2*p.length());
+        }
+        return pos;
+    }

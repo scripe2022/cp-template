@@ -1,0 +1,13 @@
+int p2i(vector<int> &a, int base = 0) {
+    int n = a.size();
+    vector<int> pos(n), f(n);
+    rep(i, 0, n) pos[i] = f[i] = i;
+    int res = 0;
+    for (int i = 0, m = 1; i < n-1; ++i) {
+        res += m * pos[a[i]-base];
+        m *= n - i;
+        pos[f[n-i-1]] = pos[a[i]-base];
+        f[pos[a[i]-base]] = f[n-i-1];
+    }
+    return res;
+}

@@ -1,0 +1,39 @@
+    int maxflow(int s, int t) {
+        S = s, T = t;
+        auto bfs = [&]() {
+            queue<int> q; q.push(S);
+            fill(dep.begin(), dep.end(), 0); dep[S] = 1;
+            while (!q.empty()) {
+                int u = q.front(); q.pop();
+                for (auto &edge: e[u]) {
+                    int v = edge.v;
+                    if (!dep[v] && (edge.cap > edge.f)) {
+                        dep[v] = dep[u] + 1;
+                        q.push(v);
+                    }
+                }
+            }
+            return dep[T];
+        };
+        function<int(int, int)> dfs = [&](int u, int flow) {
+            if (u == T || !flow) return flow;
+            int ret = 0;
+            for (int &i = cur[u]; i < sz(e[u]); ++i) {
+                auto &edge = e[u][i];
+                int v = edge.v, d;
+                if (dep[v] == dep[u] + 1 && (d = dfs(v, min(flow-ret, edge.cap-edge.f)))) {
+                    ret += d, edge.f += d;
+                    flow -= d, inv(edge).f -= d;
+                    if (!flow) break;
+                }
+            }
+            if (!ret) dep[u] = INF;
+            return ret;
+        };
+        int ans = 0;
+        while (bfs()) {
+            fill(cur.begin(), cur.end(), 0);
+            ans += dfs(S, INF);
+        }
+        return ans;
+    }

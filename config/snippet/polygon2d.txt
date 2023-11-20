@@ -1,0 +1,27 @@
+template <typename T> struct polygon2d {
+    vector<point2d<T>> p;
+    polygon2d() {}
+    polygon2d(vector<point2d<T>> a): p(a) {}
+    void add(const point2d<T> q) {p.push_back(q); }
+    T area() const {
+        T res = 0;
+        rep(i, 0, p.size()) {
+            int j = (i + 1) % p.size();
+            res += p[i].cross2(p[j]);
+        }
+        return abs(res);
+    }
+    int in(const point2d<T> &q) const {
+        line2d l(q, point2d<T>((T)(1e9+7), q.y));
+        int cnt = 0;
+        rep(i, 0, sz(p)) {
+            point2d<T> a = p[i], b = p[(i+1) % sz(p)];
+            line2d m(a, b);
+            if (m.on(q)) return 0;
+            if (!m.intersect(l)) continue;
+            int maxy = max(a.y, b.y);
+            if (maxy > q.y) ++cnt;
+        }
+        return cnt&1 ? 1 : -1;
+    }
+};

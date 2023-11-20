@@ -1,0 +1,14 @@
+    vector<int> ssp(int s) {
+        vector<int> vis(n, 0), dis(n, INF);
+        dis[s] = 0;
+        function<void(int)> dfs = [&](int u) -> void {
+            vis[u] = 1;
+            for (auto v: e[u]) {
+                if (vis[v]) continue;
+                dis[v] = dis[u] + 1;
+                dfs(v);
+            }
+        };
+        dfs(s);
+        return dis;
+    }

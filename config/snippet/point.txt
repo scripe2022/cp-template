@@ -1,0 +1,55 @@
+template <typename T> struct point {
+    vector<T> cor;
+    point() {}
+    template<typename...Args> point(Args...args) {set(args...); }
+    template<typename...Args> void set(Args...args) {cor = {args...}; }
+    point(vector<T> c) {set(c); }
+    void set(vector<T> c) {cor = c; }
+    point<T> operator+(const point<T> &rhs) const {
+        const point<T> &lhs = *this;
+        assert(lhs.cor.size() == rhs.cor.size());
+        vector<T> c(lhs.cor.size());
+        rep(i, 0, lhs.cor.size()) c[i] = lhs.cor[i] + rhs.cor[i];
+        point<T> res(c);
+        return res;
+    }
+    point<T> operator-(const point<T> &rhs) const {
+        const point<T> &lhs = *this;
+        assert(lhs.cor.size() == rhs.cor.size());
+        vector<T> c(lhs.cor.size());
+        rep(i, 0, lhs.cor.size()) c[i] = lhs.cor[i] - rhs.cor[i];
+        point<T> res(c);
+        return res;
+    }
+    bool operator==(const point<T> &rhs) const {
+        const point<T> &lhs = *this;
+        assert(lhs.cor.size() == rhs.cor.size());
+        return lhs.cor == rhs.cor;
+    }
+    T dot(const point<T> &rhs) const {
+        const point<T> &lhs = *this;
+        assert(lhs.cor.size() == rhs.cor.size());
+        T res = 0;
+        rep(i, 0, lhs.cor.size()) res += lhs.cor[i] * rhs.cor[i];
+        return res;
+    }
+    T cross2(const point<T> &rhs) const {
+        const point<T> &lhs = *this;
+        assert(lhs.cor.size() == rhs.cor.size());
+        assert(lhs.cor.size() == 2);
+        return lhs.cor[0] * rhs.cor[1] - lhs.cor[1] * rhs.cor[0];
+    }
+    point<T> cross3(const point<T> &rhs) const {
+        const point<T> &lhs = *this;
+        assert(lhs.cor.size() == rhs.cor.size());
+        assert(lhs.cor.size() == 3);
+        vector<T> c(lhs.cor.size());
+        for (int i = 0; i < (int)lhs.cor.size(); i++) {
+            int j = (i + 1) % lhs.cor.size();
+            int k = (i + 2) % lhs.cor.size();
+            c[i] = lhs.cor[j] * rhs.cor[k] - lhs.cor[k] * rhs.cor[j];
+        }
+        point<T> res(c);
+        return res;
+    }
+};

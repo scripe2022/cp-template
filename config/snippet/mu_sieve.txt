@@ -1,0 +1,16 @@
+    vector<int> mu_sieve(int N) {
+        vector<int> mu(N+1), flg(N+1), p;
+        mu[1] = 1;
+        rep(i, 2, N+1) {
+            if (!flg[i]) p.push_back(i), mu[i] = -1;
+            for (int j = 0; j < sz(p) && i * p[j] <= N; ++j) {
+                flg[i * p[j]] = 1;
+                if (i % p[j] == 0) {
+                    mu[i*p[j]] = 0;
+                    break;
+                }
+                mu[i * p[j]] = -mu[i];
+            }
+        }
+        return mu;
+    }

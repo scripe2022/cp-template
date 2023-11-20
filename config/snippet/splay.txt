@@ -1,0 +1,175 @@
+template <class T> struct splaytree {
+    struct node {
+        int rk, size, cnt;
+        T val;
+        node *ch[2], *parent;
+    };
+    T DEFAULT_VALUE;
+    node *newnode(int rank, int val) {
+        node *x = &datalist[total++];
+        x->rk = rank, x->val.set(val, &x->size, &x->cnt);
+        x->ch[0] = x->ch[1] = x->parent = nullptr;
+        x->cnt = 1;
+        return x;
+    }
+    node *root = nullptr;
+    int total = 0;
+    vector<node> datalist;
+    splaytree(int n) {
+        datalist.resize(n);
+    }
+    int get(node *x) {return x->parent->ch[1] == x; }
+ 
+    int getsize(node *x) {return x ? x->size : 0; }
+    void pushup(node *x) {
+        if (!x) return;
+        x->size = getsize(x->ch[0]) + getsize(x->ch[1]) + x->cnt;
+        if (x->ch[0]) pushdown(x->ch[0]);
+        if (x->ch[1]) pushdown(x->ch[1]);
+        x->val.pushup(x->ch[0] ? x->ch[0]->val : DEFAULT_VALUE, x->ch[1] ? x->ch[1]->val : DEFAULT_VALUE);
+    }
+    void pushdown(node *x) {
+        if (!x) return;
+        if (x->ch[0]) x->val.pushdown(x->ch[0]->val);
+        if (x->ch[1]) x->val.pushdown(x->ch[1]->val);
+        x->val.clear();
+    }
+    void rotate(node *x) {
+        node *y = x->parent;
+        node *z = y->parent;
+        int t = get(x);
+        y->ch[t] = x->ch[t ^ 1];
+        if (x->ch[t ^ 1]) x->ch[t ^ 1]->parent = y;
+        x->ch[t ^ 1] = y;
+        y->parent = x;
+        if (z) z->ch[y == z->ch[1]] = x;
+        x->parent = z;
+        pushup(y);
+        pushup(x);
+    }
+    void splay(node *x, node *target) {
+        for (node *f; f = x->parent, f != target; rotate(x)) {
+            if (f->parent != target) rotate(get(x) == get(f) ? f : x);
+        }
+        if (!target) root = x;
+    }
+    void insert(int rank, int val) {
+        if (!root) {
+            root = newnode(rank, val);
+            return;
+        }
+        node *x = root;
+        for (; ; x = x->ch[rank > x->rk]) {
+            if (x->rk == rank) {
+                ++x->cnt;
+                splay(x, nullptr);
+                return;
+            }
+            if (!x->ch[rank > x->rk]) {
+                x->ch[rank > x->rk] = newnode(rank, val);
+                x->ch[rank > x->rk]->parent = x;
+                splay(x->ch[rank > x->rk], nullptr);
+                return;
+            }
+        }
+    }
+    node *kth(int k) { // 0-index
+        node *x = root; pushdown(x);
+        for (pushdown(x); ; pushdown(x)) {
+            if (k == getsize(x->ch[0])) return x;
+            if (k < getsize(x->ch[0])) x = x->ch[0];
+            else k -= getsize(x->ch[0]) + 1, x = x->ch[1];
+        }
+        return nullptr;
+    }
+    node *select(int l, int r) {
+        splay(kth(l - 1), nullptr);
+        splay(kth(r + 1), root);
+        pushdown(root->ch[1]->ch[0]);
+        return root->ch[1]->ch[0];
+    }
+    void modify(int l, int r, int val) {
+        node *x = select(l, r);
+        x->val.update(val);
+    }
+    node *predecessor(node *x) {
+        if (x->ch[0]) {
+            x = x->ch[0];
+            while (x->ch[1]) x = x->ch[1];
+            return x;
+        }
+        while (x->parent && x->parent->ch[0] == x) x = x->parent;
+        return x->parent;
+    }
+    node *successor(node *x) {
+        if (x->ch[1]) {
+            x = x->ch[1];
+            while (x->ch[0]) x = x->ch[0];
+            return x;
+        }
+        while (x->parent && x->parent->ch[1] == x) x = x->parent;
+        return x->parent;
+    }
+    void remove(node *x) {
+        if (x->cnt > 1) {
+            --x->cnt;
+            pushup(x);
+            splay(x, nullptr);
+            return;
+        }
+        splay(predecessor(x), nullptr);
+        splay(successor(x), root);
+        root->ch[1]->ch[0] = nullptr;
+        pushup(root->ch[1]);
+        splay(root->ch[1], nullptr);
+    }
+    void graphviz_dump(string filename = "graph.dot") {
+        FILE *f = fopen(filename.c_str(), "w");
+        fprintf(f, "digraph {\n");
+        rep(i, 0, total) {
+            node *x = &datalist[i];
+            fprintf(f, "    %lld[label=\"rk=%lld", i, x->rk);
+            vector<string> desired = {
+                "size=" + to_string(x->size),
+                // "val=" + to_string(x->val.val),
+                // "sum=" + to_string(x->val.sum),
+                // "max=" + to_string(x->val.maxv),
+                // "tag=" + to_string(x->val.tag),
+            };
+            for (auto s: desired) fprintf(f, " | %s", s.c_str());
+            fprintf(f, "\" shape=\"record\"];\n");
+        }
+        rep(i, 0, total) {
+            node *x = &datalist[i];
+            if (x->ch[0]) fprintf(f, "    %lld -> %ld[label=\"L\"];\n", i, x->ch[0] - &datalist[0]);
+            if (x->ch[1]) fprintf(f, "    %lld -> %ld[label=\"R\"];\n", i, x->ch[1] - &datalist[0]);
+        }
+        fprintf(f, "}\n");
+    }
+};
+    // struct value {
+    //     int val = 0, sum = 0, maxv = -INF, tag = NaN;
+    //     int *size = nullptr, *cnt = nullptr;
+    //     void set(int rhs, int *s = nullptr, int *c = nullptr) {
+    //         if (s || c) size = s, cnt = c;
+    //         this->val = this->sum = this->maxv = rhs;
+    //     }
+    //     void pushup(value &lhs, value &rhs) {
+    //         this->sum = lhs.sum + rhs.sum + (val * (*cnt));
+    //         this->maxv = max({lhs.maxv, rhs.maxv, val});
+    //     }
+    //     void update(int rhs) {
+    //         this->tag = rhs;
+    //     }
+    //     void pushdown(value &child) {
+    //         if (tag == NaN) return;
+    //         child.tag = tag;
+    //     }
+    //     void clear() {
+    //         if (tag == NaN) return;
+    //         val = tag;
+    //         sum = tag * (*size);
+    //         maxv = tag;
+    //         tag = NaN;
+    //     }
+    // };

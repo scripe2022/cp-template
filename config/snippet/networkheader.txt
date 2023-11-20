@@ -1,0 +1,23 @@
+struct network {
+    struct node {
+        int u, v, cap, f, w;
+        int idx;
+        bool operator<(const node &other) const {return w < other.w; }
+        bool operator==(const node &other) const {return v == other.v && w == other.w; }
+    };
+    vector<vector<node>> e;
+    vector<vector<int>> invid;
+    node &inv(node &edge) {return e[edge.v][invid[edge.u][edge.idx]]; }
+
+    int n, S, T;
+    vector<int> dep, cur;
+    network(int V) {
+        n = V;
+        e.resize(n), invid.resize(n), dep.resize(n), cur.resize(n);
+    }
+    void add_edge(int u, int v, int f, int w = 0) {
+        e[u].push_back(node{u, v, f, 0, w, sz(e[u])});
+        e[v].push_back(node{v, u, 0, 0, -w, sz(e[v])});
+        invid[u].push_back(sz(e[v]) - 1);
+        invid[v].push_back(sz(e[u]) - 1);
+    }

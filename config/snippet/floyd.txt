@@ -1,0 +1,12 @@
+    void floyd(vector<vector<int>> &dis) {
+        dis.resize(n, vector<int>(n, INF));
+        rep(i, 0, n) dis[i][i] = 0;
+        rep(u, 0, n) for (auto edge: e[u]) {
+            int v = edge.v, w = edge.w;
+            dis[u][v] = min(dis[u][v], w);
+        }
+        rep(k, 0, n) rep(i, 0, n) rep(j, 0, n) {
+            if (dis[i][k] == INF || dis[k][j] == INF) continue;
+            dis[i][j] = min(dis[i][j], dis[i][k] + dis[k][j]);
+        }
+    }

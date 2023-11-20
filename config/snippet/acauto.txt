@@ -1,0 +1,105 @@
+struct acauto {
+    int base, N;
+    struct node {
+        int isword, c, depth;
+        vector<node*> ch;
+        vector<int> id;
+        node *parent = nullptr;
+        node *fail = nullptr, *dict = nullptr;
+        int fst = -1, cnt = 0;
+    };
+    node *root;
+    vector<node> datalist;
+    int total = 0;
+    node *newnode(int c, node *p = nullptr) {
+        node *x = &datalist[total++];
+        x->ch.resize(N, 0);
+        x->c = c;
+        x->parent = p;
+        return x;
+    }
+    acauto(int M, char L = 0, char R = 127) {
+        base = L;
+        N = R - L + 1;
+        datalist.resize(M);
+        root = newnode(-1);
+    }
+    void insert(string s, int i) {
+        node *x = root;
+        for (char c: s) {
+            if (!x->ch[c - base]) {
+                x->ch[c - base] = newnode(c - base, x);
+            }
+            x = x->ch[c - base];
+        }
+        x->isword = 1;
+        x->id.push_back(i);
+    }
+    void build() {
+        root->depth = 0;
+        root->fail = root;
+        root->dict = root->isword ? root : nullptr;
+        queue<node*> q;
+        rep(i, 0, N) if (root->ch[i]) {
+            root->ch[i]->fail = root;
+            root->ch[i]->dict = root->dict;
+            root->ch[i]->depth = root->depth + 1;
+            q.push(root->ch[i]);
+        }
+        while (!q.empty()) {
+            node *x = q.front(); q.pop();
+            rep(i, 0, N) if (x->ch[i]) {
+                node *y = x->fail;
+                while (y != root && !y->ch[i]) y = y->fail;
+                x->ch[i]->depth = x->depth + 1;
+                x->ch[i]->fail = y->ch[i] ? y->ch[i] : root;
+                x->ch[i]->dict = x->ch[i]->fail->isword ? x->ch[i]->fail : x->ch[i]->fail->dict;
+                q.push(x->ch[i]);
+            }
+        }
+    }
+    void match(string s) {
+        auto found = [&](node *x, int i) {
+            if (!~x->fst) x->fst = i - x->depth + 1;
+            ++x->cnt;
+        };
+        node *x = root;
+        rep(i, 0, s.length()) {
+            while (x != root && !x->ch[s[i] - base]) x = x->fail;
+            if (x->ch[s[i] - base]) x = x->ch[s[i] - base];
+            if (x->isword) found(x, i);
+            for (node *tmp = x; tmp->dict; tmp = tmp->dict) found(tmp->dict, i);
+        }
+    }
+    string get(node *x) {
+        vector<char> v;
+        while (x->parent) {
+            v.push_back(x->c + base);
+            x = x->parent;
+        }
+        reverse(v.begin(), v.end());
+        string res(v.begin(), v.end());
+        return res;
+    }
+    void graphviz_dump(string filename = "graph.dot") {
+        FILE *f = fopen(filename.c_str(), "w");
+        fprintf(f, "digraph {\n");
+        rep(i, 0, total) {
+            node *x = &datalist[i];
+            fprintf(f, "    %lld[label=\"%c\" color=\"%s\"];\n", i, (x->c >= 0 ? char(x->c + base) : ' '), x->isword ? "red" : "black");
+        }
+        queue<node*> q; q.push(root);
+        while (!q.empty()) {
+            node *x = q.front(); q.pop();
+            rep(i, 0, N) {
+                if (x->ch[i]) {
+                    fprintf(f, "    %ld -> %ld;\n", x - &datalist[0], x->ch[i] - &datalist[0]);
+                    q.push(x->ch[i]);
+                }
+            }
+            if (x->fail != root) fprintf(f, "    %ld -> %ld[style=\"dashed\" color=\"blue\"];\n", x - &datalist[0], x->fail - &datalist[0]);
+            if (x->dict) fprintf(f, "    %ld -> %ld[style=\"dashed\" color=\"green\"];\n", x - &datalist[0], x->dict - &datalist[0]);
+        }
+        fprintf(f, "}\n");
+    }
+};

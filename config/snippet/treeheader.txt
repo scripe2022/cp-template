@@ -1,0 +1,46 @@
+struct tree {
+    int n;
+    vector<vector<int>> e;
+    struct node {
+        vector<node*> ch;
+        node *parent = nullptr;
+        int size, depth, height, val, dfn;
+        node *heavy = nullptr, *top = nullptr;
+    };
+    vector<node> vertex;
+    vector<int> removed;
+    node *root;
+    tree(int V) {
+        n = V;
+        e.resize(n);
+        vertex.resize(n);
+        removed.resize(n);
+    }
+    void add_edge(int u, int v) {
+        e[u].push_back(v), e[v].push_back(u);
+    }
+    int ind(node *x) {return x - &vertex[0]; }
+    void setroot(int rt = 0) {
+        if (root != &vertex[rt]) build(rt);
+        root = &vertex[rt];
+    }
+    void build(int rt = 0) {
+        function<void(int, int)> dfs = [&](int u, int pre) {
+            node *x = &vertex[u];
+            x->size = 1;
+            x->depth = !~pre ? 0 : vertex[pre].depth + 1;
+            x->height = 1;
+            x->ch.clear();
+            for (int v: e[u]) {
+                if (v == pre || removed[v]) continue;
+                node *y = &vertex[v];
+                x->ch.push_back(y);
+                y->parent = x;
+                dfs(v, u);
+                x->size += y->size;
+                if (!x->heavy || y->size > x->heavy->size) x->heavy = y;
+                cmax(x->height, y->height + 1);
+            }
+        };
+        dfs(rt, -1);
+    }

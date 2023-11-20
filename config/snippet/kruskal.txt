@@ -1,0 +1,38 @@
+    int kruskal() {
+        struct DSU {
+            vector<int> parent, rank;
+            DSU(int n) {
+                parent.resize(n);
+                rank.resize(n);
+                rep(i, 0, n) parent[i] = i;
+            }
+            int find(int x) {
+                if (parent[x] != x) parent[x] = find(parent[x]);
+                return parent[x];
+            }
+            void unite(int x, int y) {
+                int rx = find(x), ry = find(y);
+                if (rx == ry) return;
+                if (rank[rx] < rank[ry]) parent[rx] = ry;
+                else if (rank[rx] > rank[ry]) parent[ry] = rx;
+                else parent[ry] = rx, ++rank[rx];
+            }
+        };
+        vector<pair<int, pair<int, int>>> edges;
+        rep(u, 0, n) {
+            for (auto [v, w]: e[u]) {
+                edges.push_back({w, {u, v}});
+            }
+        }
+        sort(edges.begin(), edges.end());
+        int ans = 0, cnt = 0;
+        DSU dsu(n);
+        for (auto [w, p]: edges) {
+            auto [u, v] = p;
+            if (dsu.find(u) == dsu.find(v)) continue;
+            dsu.unite(u, v);
+            ans += w;
+            if (++cnt == n-1) break;
+        }
+        return (cnt==n-1 ? ans : INF);
+    }

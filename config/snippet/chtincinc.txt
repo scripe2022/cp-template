@@ -1,0 +1,26 @@
+template <typename T> struct point2d {
+    T x, y;
+    point2d() {}
+    point2d(int X, int Y): x(X), y(Y) {}
+    point2d<T> operator+(const point2d<T> &rhs) const {return point2d<T>(x + rhs.x, y + rhs.y); }
+    point2d<T> operator-(const point2d<T> &rhs) const {return point2d<T>(x - rhs.x, y - rhs.y); }
+    bool operator==(const point2d<T> &rhs) const {return x == rhs.x && y == rhs.y; }
+    T operator*(const point2d<T> &rhs) const {return x * rhs.y - y * rhs.x; }
+};
+
+struct cht {
+    vector<point2d<int>> p;
+    int start = 0;
+    void insert(int x, int y) {
+        point2d<int> now(x, y);
+        while (sz(p) > 1 && (p[sz(p)-1] - p[sz(p)-2]) * (now - p[sz(p)-1]) < 0) p.pop_back();
+        cmin(start, max(sz(p)-1, 0ll));
+        p.emplace_back(now);
+    }
+    int findmin(int k) {
+        if (p.empty()) return INF;
+        if (p.size() == 1) return p[0].y - k*p[0].x;
+        for (; start < sz(p)-1 && (p[start+1] - p[start]) * point2d<int>(1, k) >= 0; ++start);
+        return p[start].y - k*p[start].x;
+    }
+};

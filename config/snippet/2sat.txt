@@ -1,0 +1,71 @@
+    void tarjan_scc(vector<vector<int>> &scc, vector<int> &belong) {
+        stack<int> s;
+        vector<int> dfn(n), low(n), instack(n);
+        int dfncnt;
+        scc.clear(), belong.resize(n, -1);
+        function<void(int)> dfs = [&](int u) {
+            low[u] = dfn[u] = ++dfncnt, s.push(u), instack[u] = 1;
+            for (auto edge: e[u]) {
+                int v = edge.v;
+                if (!dfn[v]) dfs(v), cmin(low[u], low[v]);
+                else if (instack[v]) cmin(low[u], dfn[v]);
+            }
+            if (dfn[u] == low[u]) {
+                scc.push_back(vector<int>{});
+                while (s.top() != u) {
+                    belong[s.top()] = sz(scc) - 1;
+                    scc.back().push_back(s.top());
+                    instack[s.top()] = 0, s.pop();
+                }
+                belong[s.top()] = sz(scc) - 1;
+                scc.back().push_back(s.top());
+                instack[s.top()] = 0, s.pop();
+            }
+        };
+        rep(i, 0, n) if (!~belong[i]) dfs(i);
+    }
+    int topo(vector<int> &vs) {
+        vector<int> din(n, 0);
+        for (auto es: e) for (auto edge: es) ++din[edge.v];
+        queue<int> q;
+        rep(i, 0, n) if (!din[i]) q.push(i);
+        vs.clear();
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            vs.push_back(u);
+            for (auto [v, _]: e[u]) {
+                if (!--din[v]) q.push(v);
+            }
+        }
+        return sz(vs) == n;
+    }
+    graph contract(vector<vector<int>> &scc, vector<int> &belong) {
+        tarjan_scc(scc, belong);
+        int V = sz(scc);
+        graph dag(V, 1);
+        vector<int> vis(V, 0);
+        for (auto comp: scc) {
+            for (auto u: comp) {
+                for (auto edge: e[u]) {
+                    int v = edge.v;
+                    if (belong[u] != belong[v]) {
+                        dag.add_edge(belong[u], belong[v]);
+                        vis[belong[v]] = 1;
+                    }
+                }
+            }
+            for (auto u: comp) for (auto edge: e[u]) if (belong[u] != belong[edge.v]) vis[belong[edge.v]] = 0;
+        }
+        return dag;
+    }
+    int twosat(vector<int> &ans) {
+        vector<vector<int>> scc; vector<int> belong; auto dag = contract(scc, belong);
+        int V = n >> 1;
+        rep(i, 0, V) if (belong[i] == belong[i + V]) return 0;
+        vector<int> vs; dag.topo(vs);
+        vector<int> idx(dag.n);
+        rep(i, 0, dag.n) idx[vs[i]] = i;
+        ans.assign(V, 0);
+        rep(i, 0, V) if (idx[belong[i]] > idx[belong[i + V]]) ans[i] = 1;
+        return 1;
+    }

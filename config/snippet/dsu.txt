@@ -1,0 +1,23 @@
+struct DSU {
+    vector<int> parent, rank, s;
+    DSU(int n) {
+        parent.resize(n);
+        rank.resize(n);
+        s.resize(n, 1);
+        rep(i, 0, n) parent[i] = i;
+    }
+    int find(int x) {
+        if (parent[x] != x) parent[x] = find(parent[x]);
+        return parent[x];
+    }
+    void unite(int x, int y) {
+        int rx = find(x), ry = find(y);
+        if (rx == ry) return;
+        if (rank[rx] < rank[ry]) parent[rx] = ry, s[ry] = s[rx] + s[ry];
+        else if (rank[rx] > rank[ry]) parent[ry] = rx, s[rx] = s[rx] + s[ry];
+        else parent[ry] = rx, ++rank[rx], s[rx] = s[rx] + s[ry];
+    }
+    int get_size(int x) {
+        return s[find(x)];
+    }
+};

@@ -1,0 +1,9 @@
+    vector<int> prefix_function(string s) {
+        vector<int> pi(s.length(), 0);
+        rep(i, 1, s.length()) {
+            int j = pi[i-1];
+            while (j && s[i] != s[j]) j = pi[j-1];
+            pi[i] = j + (s[i] == s[j]);
+        }
+        return pi;
+    }

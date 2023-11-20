@@ -1,0 +1,44 @@
+    pair<int, int> mcmf(int s, int t) {
+        S = s, T = t;
+        vector<int> vis(n), dis(n);
+        int maxflow = 0, mincost = 0;
+        auto spfa = [&]() {
+            queue<int> q; q.push(S);
+            fill(dis.begin(), dis.end(), INF); dis[S] = 0;
+            vis[S] = 1;
+            while (!q.empty()) {
+                int u = q.front(); q.pop();
+                vis[u] = 0;
+                for (auto &edge: e[u]) {
+                    int v = edge.v;
+                    if (dis[v] > dis[u] + edge.w && edge.f < edge.cap) {
+                        dis[v] = dis[u] + edge.w;
+                        if (!vis[v]) q.push(v), vis[v] = 1;
+                    }
+                }
+            }
+            return dis[T] != INF;
+        };
+        function<int(int, int)> dfs = [&](int u, int flow) {
+            if (u == T) return flow;
+            vis[u] = 1;
+            int ret = 0;
+            for (int &i = cur[u]; i < sz(e[u]); ++i) {
+                auto &edge = e[u][i];
+                int v = edge.v, d;
+                if (!vis[v] && edge.f < edge.cap && dis[v] == dis[u] + edge.w && (d = dfs(v, min(flow, edge.cap-edge.f)))) {
+                    mincost += d * edge.w;
+                    ret += d, edge.f += d;
+                    flow -= d, inv(edge).f -= d;
+                    if (!flow) break;
+                }
+            }
+            vis[u] = 0;
+            return ret;
+        };
+        while (spfa()) {
+            fill(cur.begin(), cur.end(), 0);
+            maxflow += dfs(S, INF);
+        }
+        return {maxflow, mincost};
+    }

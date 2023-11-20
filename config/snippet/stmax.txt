@@ -1,0 +1,24 @@
+struct stmax {
+    vector<int> a, lg;
+    vector<vector<int>> dp;
+    stmax(vector<int> v) {
+        a = v;
+        build();
+    }
+    void build() {
+        int logn = log2(sz(a)) + 2;
+        dp.assign(sz(a), vector<int>(logn, 0));
+        rep(i, 0, sz(a)) dp[i][0] = a[i];
+        rep(j, 1, logn) {
+            rep(i, 0, sz(a)) {
+                dp[i][j] = max(dp[i][j-1], dp[min(i + (1 << (j-1)), sz(a)-1)][j-1]);
+            }
+        }
+        lg.resize(sz(a)+1); lg[1] = 0;
+        rep(i, 2, sz(a)+1) lg[i] = lg[i/2] + 1;
+    }
+    int query(int l, int r) {
+        int j = lg[r - l + 1];
+        return max(dp[l][j], dp[r - (1 << j) + 1][j]);
+    }
+};

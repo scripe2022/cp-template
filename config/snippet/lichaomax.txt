@@ -1,0 +1,83 @@
+struct lichao {
+    struct line {
+        int k, b;
+        line(): k(NaN), b(NaN) {} 
+        line(int k_, int b_): k(k_), b(b_) {}
+        int operator()(int x) {return k*x + b; }
+        int exist() {return k != NaN; }
+        void clear() {k = NaN, b = NaN; }
+    };
+    struct node {
+        int l, r;
+        int val;
+        node *ch[2];
+        line tag;
+    };
+    vector<node> pool;
+    int total = 0;
+    node *root;
+    node* newnode(int l, int r) {
+        node *x = &pool[total++];
+        x->l = l, x->r = r, x->val = -INF;
+        return x;
+    }
+    lichao(int L, int R) {
+        pool.resize((R-L+1) << 1);
+        function<void(node*)> build = [&](node *x) -> void {
+            if (x->l == x->r) return;
+            int mid = (x->l+x->r) >> 1;
+            build(x->ch[0] = newnode(x->l, mid));
+            build(x->ch[1] = newnode(mid+1, x->r));
+        };
+        build(root = newnode(L, R));
+    }
+    void update(node *x, line l) {
+        if (!x) return;
+        if (!x->tag.exist()) {
+            x->tag = l;
+            return;
+        }
+        int mid = (x->l+x->r) >> 1;
+        cmax(x->val, x->tag(mid));
+        if (l(x->l) >= x->tag(x->l) && l(x->r) >= x->tag(x->r)) x->tag = l;
+        else if (l(x->l) <= x->tag(x->l) && l(x->r) <= x->tag(x->r)) return;
+        else update(x->ch[0], l), update(x->ch[1], l);
+    }
+    void insert(int l, int r, int k, int b) {
+        function<void(node*)> dfs = [&](node *x) -> void {
+            if (x->l > r || x->r < l) return;
+            if (x->l >= l && x->r <= r) {
+                update(x, line(k, b));
+                return;
+            }
+        };
+        dfs(root);
+    }
+    int query(int p) {
+        int res = -INF;
+        for (node *x = root; x; x = x->ch[p > ((x->l+x->r) >> 1)]) {
+            if (x->tag.exist()) cmax(res, x->tag(p));
+        }
+        return res;
+    }
+    void graphviz_dump(string filename = "graph.dot") {
+        FILE *f = fopen(filename.c_str(), "w");
+        fprintf(f, "digraph {\n");
+        rep(i, 0, total) {
+            node *x = &pool[i];
+            fprintf(f, "    %lld[label=\"(%lld, %lld)", i, x->l, x->r);
+            vector<string> desired = {
+                "val=" + (x->val==INF ? "INF" : to_string(x->val)),
+                "" + (x->tag.k==NaN ? "NaN" : to_string(x->tag.k)) + "," + (x->tag.b == NaN ? "NaN" : to_string(x->tag.b))
+            };
+            for (auto s: desired) fprintf(f, " | %s", s.c_str());
+            fprintf(f, "\" shape=\"record\"];\n");
+        }
+        rep(i, 0, total) {
+            node *x = &pool[i];
+            if (x->ch[0]) fprintf(f, "    %lld -> %ld[arrowhead=\"none\"];\n", i, x->ch[0] - &pool[0]);
+            if (x->ch[1]) fprintf(f, "    %lld -> %ld[arrowhead=\"none\"];\n", i, x->ch[1] - &pool[0]);
+        }
+        fprintf(f, "}\n");
+    }
+};

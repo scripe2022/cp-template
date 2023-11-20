@@ -1,0 +1,26 @@
+    void tarjan_scc(vector<vector<int>> &scc, vector<int> &belong) {
+        stack<int> s;
+        vector<int> dfn(n), low(n), instack(n);
+        int dfncnt;
+        scc.clear(), belong.resize(n, -1);
+        function<void(int)> dfs = [&](int u) {
+            low[u] = dfn[u] = ++dfncnt, s.push(u), instack[u] = 1;
+            for (auto edge: e[u]) {
+                int v = edge.v;
+                if (!dfn[v]) dfs(v), cmin(low[u], low[v]);
+                else if (instack[v]) cmin(low[u], dfn[v]);
+            }
+            if (dfn[u] == low[u]) {
+                scc.push_back(vector<int>{});
+                while (s.top() != u) {
+                    belong[s.top()] = sz(scc) - 1;
+                    scc.back().push_back(s.top());
+                    instack[s.top()] = 0, s.pop();
+                }
+                belong[s.top()] = sz(scc) - 1;
+                scc.back().push_back(s.top());
+                instack[s.top()] = 0, s.pop();
+            }
+        };
+        rep(i, 0, n) if (!~belong[i]) dfs(i);
+    }

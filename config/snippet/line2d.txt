@@ -1,0 +1,31 @@
+template <typename T> struct line2d {
+    point2d<T> a, b;
+    line2d() {}
+    line2d(point2d<T> A, point2d<T> B): a(A), b(B) {}
+    bool on(point2d<T> p, bool ica = 1, bool icb = 1) {
+        if (!ica && a == p) return false;
+        if (!icb && b == p) return false;
+        point2d<T> v1 = p - a, v2 = p - b;
+        return v1.cross2(v2) == 0 && v1.dot(v2) <= 0;
+    }
+    bool intersect(line2d<T> &rhs, bool ica = 1, bool icb = 1) {
+        line2d<T> &lhs = *this;
+        if (!ica && rhs.on(lhs.a)) return false;
+        if (!icb && rhs.on(lhs.b)) return false;
+        if (lhs.on(rhs.a, ica, icb) || lhs.on(rhs.b, ica, icb)) return true;
+        if ((ica && rhs.on(lhs.a)) || (icb && rhs.on(lhs.b))) return true;
+        auto mul = [](T A, T B) -> T {
+            if (A == 0 || B == 0) return 0;
+            if ((A > 0 && B > 0) || (A < 0 && B < 0)) return 1;
+            return -1;
+        };
+        point2d<T> ab = lhs.b - lhs.a;
+        point2d<T> ac = rhs.a - lhs.a;
+        point2d<T> ad = rhs.b - lhs.a;
+        point2d<T> cd = rhs.b - rhs.a;
+        point2d<T> ca = lhs.a - rhs.a;
+        point2d<T> cb = lhs.b - rhs.a;
+        if (mul(ab.cross2(ac), ab.cross2(ad)) < 0 && mul(cd.cross2(ca), cd.cross2(cb)) < 0) return true;
+        return false;
+    }
+};

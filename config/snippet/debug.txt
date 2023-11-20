@@ -1,0 +1,416 @@
+#include <iostream>
+#include <boost/pfr.hpp>
+#include <queue>
+#include <stack>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <map>
+#include <vector>
+using namespace std;
+#define COLOR_PREFIX "\e[41m"
+#define COLOR_NAME_PREFIX "\e[45m"
+#define COLOR_SUFFIX "\e[0m"
+#define PRINTCOLOR(x) {cerr << COLOR_PREFIX << (x) << COLOR_SUFFIX;}
+#define PRINTCOLOR2(x,y) {cerr << COLOR_PREFIX << (x) << (y) << COLOR_SUFFIX;}
+#define PRINTCOLOR3(x,y,z) {cerr << COLOR_PREFIX << (x) << (y) << (z) << COLOR_SUFFIX;}
+#define PRINTPLAIN(x) {cerr << (x);}
+#define PRINTPLAIN2(x,y) {cerr << (x) << (y);}
+#define PRINTPLAIN3(x,y,z) {cerr << (x) << (y) << (z);}
+#define TEXTCOLOR(x, COLOR_) {cerr << (~COLOR_ ? color_list_[COLOR_ % 5] : "") << COLOR_PREFIX << (x) << COLOR_SUFFIX;}
+#define TEXTPLAIN(x, COLOR_) {cerr << (~COLOR_ ? fore_color_list_[(COLOR_-1) % 5] : "") << (x) << COLOR_SUFFIX;}
+
+const string color_list_[] = {"", "\033[1;32m", "\033[1;34m", "\033[1;39m", "\033[1;37m"};
+const string fore_color_list_[] = {"\033[1;31m", "\033[1;32m", "\033[1;33m", "\033[1;35m", "\033[1;36m"};
+
+bool is_base_type_(string type_name) {
+	if (type_name == "int32_t") return true;
+	if (type_name == "long") return true;
+	if (type_name == "long long") return true;
+	if (type_name == "unsigned") return true;
+	if (type_name == "unsigned long") return true;
+	if (type_name == "unsigned long long") return true;
+	if (type_name == "float") return true;
+	if (type_name == "double") return true;
+	if (type_name == "long double") return true;
+	if (type_name == "char") return true;
+	if (type_name == "string") return true;
+	return false;
+}
+
+template<typename T, typename V> void __print(const pair<T, V> &x, int color=-1, int fmt=0);
+template<typename... Args> void __print(const tuple<Args...> &x, int color=-1, int fmt=0);
+template<typename T> void __print(const vector<T> &x, int color=-1, int fmt=0);
+template<typename T, class C> void __print(const set<T, C> &x, int color=-1, int fmt=0);
+template<typename T> void __print(const unordered_set<T> &x, int color=-1, int fmt=0);
+template<typename T, typename V, class C> void __print(const map<T, V, C> &x, int color=-1, int fmt=0);
+template<typename T, typename V> void __print(const unordered_map<T, V> &x, int color=-1, int fmt=0);
+template<typename T> void __print(const queue<T> &x, int color=-1, int fmt=0);
+template<typename T> void __print(const stack<T> &x, int color=-1, int fmt=0);
+template<typename T, class C, typename comp> void __print(const priority_queue<T, C, comp> &x, int color=-1, int fmt=0);
+template<typename T> void __print(const T &x, int color, int fmt=0);
+
+void __print(int32_t x, int color=-1, int fmt=0) {if (fmt) PRINTPLAIN(x) else PRINTCOLOR(x);}
+void __print(long x, int color=-1, int fmt=0) {if (fmt) PRINTPLAIN(x) else PRINTCOLOR(x);}
+void __print(long long x, int color=-1, int fmt=0) {if (fmt) PRINTPLAIN(x) else PRINTCOLOR(x);}
+void __print(unsigned x, int color=-1, int fmt=0) {if (fmt) PRINTPLAIN(x) else PRINTCOLOR(x);}
+void __print(unsigned long x, int color=-1, int fmt=0) {if (fmt) PRINTPLAIN(x) else PRINTCOLOR(x);}
+void __print(unsigned long long x, int color=-1, int fmt=0) {if (fmt) PRINTPLAIN(x) else PRINTCOLOR(x);}
+void __print(float x, int color=-1, int fmt=0) {if (fmt) PRINTPLAIN(x) else PRINTCOLOR(x);}
+void __print(double x, int color=-1, int fmt=0) {if (fmt) PRINTPLAIN(x) else PRINTCOLOR(x);}
+void __print(long double x, int color=-1, int fmt=0) {if (fmt) PRINTPLAIN(x) else PRINTCOLOR(x);}
+void __print(char x, int color=-1, int fmt=0) {if (fmt) PRINTPLAIN3('\'', x, '\'') else PRINTCOLOR3('\'', x, '\'');}
+void __print(const char *x, int color=-1, int fmt=0) {if (fmt) PRINTPLAIN3('\"', x, '\"') else PRINTCOLOR3('\"', x, '\"');}
+void __print(const string &x, int color=-1, int fmt=0) {if (fmt) PRINTPLAIN3('\"', x, '\"') else PRINTCOLOR3('\"', x, '\"');}
+void __print(bool x, int color=-1, int fmt=0) {if (fmt) PRINTPLAIN(x?"true":"false") else PRINTCOLOR(x?"true":"false");}
+
+template<typename T, typename V>
+void __print(const pair<T, V> &x, int color, int fmt) {
+	// string delimiter = (is_base_type_(boost::typeindex::type_id<T>().pretty_name()) && is_base_type_(boost::typeindex::type_id<V>().pretty_name())) ? ", " : ", ";
+	if (!fmt) {
+		string delimiter = ", ";
+		TEXTCOLOR('{', color);
+		__print(x.first, ~color ? color+1 : -1, 0);
+		PRINTCOLOR(delimiter);
+		__print(x.second, ~color ? color+1 : -1, 0);
+		TEXTCOLOR('}', color);
+	}
+	else {
+		TEXTPLAIN("pair {\n", fmt);
+		for (int _i = 0; _i < fmt; ++_i) cerr << "    "; __print(x.first, ~color ? color+1 : -1, fmt+1); cerr << "\n";
+		for (int _i = 0; _i < fmt; ++_i) cerr << "    "; __print(x.second, ~color ? color+1 : -1, fmt+1); cerr << "\n";
+		for (int _i = 0; _i < fmt-1; ++_i) cerr << "    ";
+		TEXTPLAIN('}', fmt);
+	}
+}
+
+template<typename... Args>
+void __print(const tuple<Args...> &x, int color, int fmt) {
+	if (!fmt) {
+		string delimiter = ", ";
+		int f = 0;
+		TEXTCOLOR('{', color);
+	    std::apply([&](const auto &... args) {
+	    	auto d_print = [&](const auto &arg) {
+	    		PRINTCOLOR(f++ ? ", " : "");
+				__print(arg, ~color ? color+1 : -1, 0);
+			};
+	        (d_print(args), ...);
+	    }, x);
+	    TEXTCOLOR('}', color);
+	}
+	else {
+		TEXTPLAIN("tuple {\n", fmt);
+		std::apply([&](const auto &... args) {
+	    	auto d_print = [&](const auto &arg) {
+				for (int _i = 0; _i < fmt; ++_i) cerr << "    "; __print(arg, ~color ? color+1 : -1, fmt+1); cerr << "\n";
+			};
+	        (d_print(args), ...);
+	    }, x);
+	    for (int _i = 0; _i < fmt-1; ++_i) cerr << "    ";
+	    TEXTPLAIN('}', fmt);
+	}
+}
+
+template<typename T>
+void __print(const vector<T> &x, int color, int fmt) {
+	// string delimiter = is_base_type_(boost::typeindex::type_id<T>().pretty_name()) ? ", " : ", ";
+    if (!fmt) {
+		string delimiter = ", ";
+		int f = 0;
+        TEXTCOLOR('[', color);
+        for (auto &i: x) {
+            PRINTCOLOR(f++ ? delimiter : "");
+            __print(i, ~color ? color+1 : -1, 0);
+        }
+        TEXTCOLOR(']', color);
+    }
+    else {
+        TEXTPLAIN("vector [\n", fmt);
+        int cnt = 0;
+        for (auto &i: x) {
+            for (int _i = 0; _i < fmt; ++_i) cerr << "    ";
+            TEXTPLAIN(cnt++, fmt); TEXTPLAIN(": ", fmt);
+            __print(i, ~color ? color+1 : -1, fmt+1); cerr << "\n";
+        }
+        for (int _i = 0; _i < fmt-1; ++_i) cerr << "    ";
+    	TEXTPLAIN("]", fmt);
+    }
+}
+
+template<typename T, class C>
+void __print(const set<T, C> &x, int color, int fmt) {
+	// string delimiter = is_base_type_(boost::typeindex::type_id<T>().pretty_name()) ? ", " : ", ";
+	if (!fmt) {
+		string delimiter = ", ";
+		int f = 0;
+        TEXTCOLOR('[', color);
+        for (auto &i: x) {
+            PRINTCOLOR(f++ ? delimiter : "");
+            __print(i, ~color ? color+1 : -1, 0);
+        }
+        TEXTCOLOR(']', color);
+    }
+    else {
+        TEXTPLAIN("set [\n", fmt);
+        int cnt = 0;
+        for (auto &i: x) {
+            for (int _i = 0; _i < fmt; ++_i) cerr << "    ";
+            TEXTPLAIN(cnt++, fmt); TEXTPLAIN(": ", fmt);
+            __print(i, ~color ? color+1 : -1, fmt+1); cerr << "\n";
+        }
+        for (int _i = 0; _i < fmt-1; ++_i) cerr << "    ";
+    	TEXTPLAIN("]", fmt);
+    }
+}
+
+template<typename T>
+void __print(const unordered_set<T> &x, int color, int fmt) {
+	// string delimiter = is_base_type_(boost::typeindex::type_id<T>().pretty_name()) ? ", " : ", ";
+	if (!fmt) {
+		string delimiter = ", ";
+		int f = 0;
+        TEXTCOLOR('[', color);
+        for (auto &i: x) {
+            PRINTCOLOR(f++ ? delimiter : "");
+            __print(i, ~color ? color+1 : -1, 0);
+        }
+        TEXTCOLOR(']', color);
+    }
+    else {
+        TEXTPLAIN("unordered_set [\n", fmt);
+        int cnt = 0;
+        for (auto &i: x) {
+            for (int _i = 0; _i < fmt; ++_i) cerr << "    ";
+            TEXTPLAIN(cnt++, fmt); TEXTPLAIN(": ", fmt);
+            __print(i, ~color ? color+1 : -1, fmt+1); cerr << "\n";
+        }
+        for (int _i = 0; _i < fmt-1; ++_i) cerr << "    ";
+    	TEXTPLAIN("]", fmt);
+    }
+}
+
+template<typename T, typename V, class C>
+void __print(const map<T, V, C> &x, int color, int fmt) {
+	// string delimiter = (is_base_type_(boost::typeindex::type_id<T>().pretty_name()) && is_base_type_(boost::typeindex::type_id<V>().pretty_name())) ? ", " : ", ";
+	if (!fmt) {
+		string delimiter = ", ";
+		int f = 0;
+		TEXTCOLOR('{', color);
+		for (auto &[i, j]: x) {
+			PRINTCOLOR(f++ ? delimiter : "");
+			__print(i, ~color ? color+1 : -1, 0);
+			PRINTCOLOR(": ");
+			__print(j, ~color ? color+1 : -1, 0);
+		}
+		TEXTCOLOR('}', color);
+	}
+	else {
+		TEXTPLAIN("map {\n", fmt);
+		for (auto &[i, j]: x) {
+			for (int _i = 0; _i < fmt; ++_i) cerr << "    ";
+			__print(i, ~color ? color+1 : -1, fmt+1);
+			TEXTPLAIN(": ", fmt);
+			__print(j, ~color ? color+1 : -1, fmt+1);
+			cerr << "\n";
+		}
+		for (int _i = 0; _i < fmt-1; ++_i) cerr << "    ";
+		TEXTPLAIN("}", fmt);
+	}
+}
+
+template<typename T, typename V>
+void __print(const unordered_map<T, V> &x, int color, int fmt) {
+	// string delimiter = (is_base_type_(boost::typeindex::type_id<T>().pretty_name()) && is_base_type_(boost::typeindex::type_id<V>().pretty_name())) ? ", " : ", ";
+	if (!fmt) {
+		string delimiter = ", ";
+		int f = 0;
+		TEXTCOLOR('{', color);
+		for (auto &[i, j]: x) {
+			PRINTCOLOR(f++ ? delimiter : "");
+			__print(i, ~color ? color+1 : -1, 0);
+			PRINTCOLOR(": ");
+			__print(j, ~color ? color+1 : -1, 0);
+		}
+		TEXTCOLOR('}', color);
+	}
+	else {
+		TEXTPLAIN("unordered_map {\n", fmt);
+		for (auto &[i, j]: x) {
+			for (int _i = 0; _i < fmt; ++_i) cerr << "    ";
+			__print(i, ~color ? color+1 : -1, fmt+1);
+			TEXTPLAIN(": ", fmt);
+			__print(j, ~color ? color+1 : -1, fmt+1);
+			cerr << "\n";
+		}
+		for (int _i = 0; _i < fmt-1; ++_i) cerr << "    ";
+		TEXTPLAIN("}", fmt);
+	}
+}
+
+template<typename T>
+void __print(const queue<T> &x, int color, int fmt) {
+	// string delimiter = is_base_type_(boost::typeindex::type_id<T>().pretty_name()) ? ", " : ", ";
+	if (!fmt) {
+		string delimiter = ", ";
+		int f = 0;
+		TEXTCOLOR('[', color);
+		queue<T> cx = x;
+		while (!cx.empty()) {
+			PRINTCOLOR(f++ ? delimiter : "");
+			__print(cx.front(), ~color ? color+1 : -1, 0);
+			cx.pop();
+		}
+		TEXTCOLOR(']', color);
+	}
+	else {
+		TEXTPLAIN("queue [\n", fmt);
+		queue<T> cx = x;
+		int cnt = 0;
+		while (!cx.empty()) {
+			for (int _i = 0; _i < fmt; ++_i) cerr << "    ";
+			TEXTPLAIN(cnt++, fmt); TEXTPLAIN(": ", fmt); __print(cx.front(), ~color ? color+1 : -1, fmt+1); cerr << "\n";
+			cx.pop();
+		}
+		for (int _i = 0; _i < fmt-1; ++_i) cerr << "    ";
+		TEXTPLAIN("}", fmt);
+	}
+}
+
+template<typename T>
+void __print(const stack<T> &x, int color, int fmt) {
+	// string delimiter = is_base_type_(boost::typeindex::type_id<T>().pretty_name()) ? ", " : ", ";
+	string delimiter = ", ";
+	stack<T> cx = x;
+	vector<T> vx;
+	while (!cx.empty()) vx.push_back(cx.top()), cx.pop();
+	reverse(vx.begin(), vx.end());
+	if (!fmt) {
+		string delimiter = ", ";
+		int f = 0;
+        TEXTCOLOR('[', color);
+        for (auto &i: vx) {
+            PRINTCOLOR(f++ ? delimiter : "");
+            __print(i, ~color ? color+1 : -1, 0);
+        }
+        TEXTCOLOR(']', color);
+    }
+    else {
+        TEXTPLAIN("stack [\n", fmt);
+        int cnt = 0;
+        for (auto &i: vx) {
+            for (int _i = 0; _i < fmt; ++_i) cerr << "    ";
+            TEXTPLAIN(cnt++, fmt); TEXTPLAIN(": ", fmt);
+            __print(i, ~color ? color+1 : -1, fmt+1); cerr << "\n";
+        }
+        for (int _i = 0; _i < fmt-1; ++_i) cerr << "    ";
+    	TEXTPLAIN("]", fmt);
+    }
+}
+
+template<typename T, class C, typename comp>
+void __print(const priority_queue<T, C, comp> &x, int color, int fmt) {
+	// string delimiter = is_base_type_(boost::typeindex::type_id<T>().pretty_name()) ? ", " : ", ";
+	if (!fmt) {
+		string delimiter = ", ";
+		int f = 0;
+		TEXTCOLOR('[', color);
+		priority_queue<T, C, comp> cx = x;
+		while (!cx.empty()) {
+			PRINTCOLOR(f++ ? delimiter : "");
+			__print(cx.top(), ~color ? color+1 : -1, 0);
+			cx.pop();
+		}
+		TEXTCOLOR(']', color);
+	}
+	else {
+		TEXTPLAIN("priority_queue [\n", fmt);
+		int cnt = 0;
+		priority_queue<T, C, comp> cx = x;
+		while (!cx.empty()) {
+			for (int _i = 0; _i < fmt; ++_i) cerr << "    ";
+			TEXTPLAIN(cnt++, fmt); TEXTPLAIN(": ", fmt);
+			__print(cx.top(), ~color ? color+1 : -1, fmt+1); cerr << "\n";
+			cx.pop();
+		}
+		for (int _i = 0; _i < fmt-1; ++_i) cerr << "    ";
+		TEXTPLAIN("]", fmt);
+	}
+}
+
+template<typename T>
+void __print(const T &x, int color, int fmt) {
+	if (!fmt) {
+		int f = 0;
+		TEXTCOLOR('{', color);
+		boost::pfr::for_each_field(x, [&](auto&& t){
+			PRINTCOLOR(f++ ? ", " : "");
+			__print(t, ~color ? color+1 : -1, 0);
+		});
+		TEXTCOLOR('}', color);
+	}
+	else {
+		TEXTPLAIN("struct {\n", fmt);
+		boost::pfr::for_each_field(x, [&](auto&& t){
+			for (int _i = 0; _i < fmt; ++_i) cerr << "    ";
+			__print(t, ~color ? color+1 : -1, fmt+1); cerr << "\n";
+		});
+		for (int _i = 0; _i < fmt-1; ++_i) cerr << "    ";
+		TEXTPLAIN("}", fmt);
+	}
+}
+
+void _print() {cerr << "\n";}
+template <typename T, typename... V>
+void _print(T t, V... v) {
+	cerr << COLOR_PREFIX << " " << COLOR_SUFFIX;
+	__print(t, 0, 0);
+	if (sizeof...(v)) cerr<< COLOR_PREFIX << " " << COLOR_SUFFIX << "  ";
+	else cerr << COLOR_PREFIX << " " << COLOR_SUFFIX;
+	_print(v...);
+}
+
+void _print_format() {cerr << "\n";}
+template <typename T, typename... V>
+void _print_format(T t, V... v) {
+	// cerr << COLOR_PREFIX << " " << COLOR_SUFFIX;
+	__print(t, 0, 1);
+	// if (sizeof...(v)) cerr<< COLOR_PREFIX << " " << COLOR_SUFFIX << "  ";
+	// else cerr << COLOR_PREFIX << " " << COLOR_SUFFIX;
+	_print_format(v...);
+}
+
+template <typename T>
+void _variables(T t) {
+    std::string s = t;
+    std::string x = "";
+    int disruptor = 0;
+    int qts = 0;
+    int qtss = 0;
+    for (char c: s) {
+    	if (c == ' ') continue;
+    	if (c == '[' || c == '(' || c == '{') ++disruptor;
+    	if (c == ']' || c == ')' || c == '}') --disruptor;
+    	if (c == '\'') qts ^= 1;
+    	if (c == '"') qtss ^= 1;
+    	if (c == ',' && disruptor == 0 && qts == 0 && qtss == 0) {
+    		std::cerr << COLOR_NAME_PREFIX << " " << x << " " << COLOR_SUFFIX << "  ";
+    		x = "";
+    	}
+    	else x += c;
+    }
+    std::cerr << COLOR_NAME_PREFIX << " " << x << " " << COLOR_SUFFIX << " ";
+        
+    cerr << "= ";
+}
+
+template <typename T, typename V, typename... W>
+void _debug_print(T a, V b, W... c) {
+	_variables(a);
+	_print(b, c...);
+}
+
+template <typename T, typename V, typename... W>
+void _debug_print_format(T a, V b, W... c) {
+	_print_format(b, c...);
+}

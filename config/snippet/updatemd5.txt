@@ -1,0 +1,19 @@
+#!/bin/bash
+for param in "$@"; do
+	fullname=$param
+	extension="${fullname##*.}"
+	basename=${fullname##*/}
+	filename="${basename%.*}"
+	echo $basename
+	md5_hash=$(md5sum "$fullname" | awk '{ print $1 }')
+	hashfile=~/.hash/$filename.$extension.md5
+	hashcontent=''
+	if [ ! -f "$hashfile" ]; then
+	    touch $hashfile
+	else
+		hashcontent=$(< "$hashfile")
+	fi
+	if [ "$md5_hash" != "$hashcontent" ] || [ ! -f "$basename" ]; then
+		echo $md5_hash > $hashfile
+	fi
+done

@@ -1,0 +1,9 @@
+{
+    "ancestor": [
+        "ssp"
+    ],
+    "lca": [
+        "ssp",
+        "ancestor"
+    ]
+}

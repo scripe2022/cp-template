@@ -1,0 +1,14 @@
+    void dsu(auto add, auto del, auto setans) {
+        auto [order, ts] = dfsorder(1);
+        function<void(node*, int)> dfs = [&](node *x, int keep) {
+            for (auto y: x->ch) if (x->heavy && y != x->heavy) dfs(y, 0);
+            if (x->heavy) dfs(x->heavy, 1);
+            for (auto y: x->ch) if (x->heavy && y != x->heavy) {
+                rep(i, ts[ind(y)].first, ts[ind(y)].second+1) add(&vertex[order[i]]);
+            }
+            add(x);
+            setans(ind(x));
+            if (!keep) rep(i, ts[ind(x)].first, ts[ind(x)].second+1) del(&vertex[order[i]]);
+        };
+        dfs(root, 0);
+    }

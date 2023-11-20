@@ -1,0 +1,27 @@
+    void graphviz_dump(int plus = 0, string filename = "graph.dot") {
+        string vlabel = "", elabel = "";
+        // vlabel = " color=\"red\"";
+        elabel = " color=\"red\"";
+        set<int> vset; set<pair<int, int>> eset;
+        rep(i, 0, n) if (vertex[i].heavy) vset.insert(ind(vertex[i].heavy)), eset.insert({i, ind(vertex[i].heavy)});
+        FILE *f = fopen(filename.c_str(), "w");
+        fprintf(f, "digraph Tree {\n");
+        rep(i, 0, n) {
+            node *x = &vertex[i];
+            fprintf(f, "    %lld[label=\"%lld", i, i+plus);
+            vector<string> desired = {
+                "top=" + to_string(ind(x->top) + plus),
+                "order=" + to_string(x->dfn),
+            };
+            for (auto s: desired) fprintf(f, " | %s", s.c_str());
+            fprintf(f, "\" shape=\"record\"%s];\n", vset.count(i) ? vlabel.c_str() : "");
+        }
+        rep(i, 0, n) {
+            node *x = &vertex[i];
+            for (auto y: x->ch) {
+                fprintf(f, "    %ld -> %ld[arrowhead=\"none\"%s];\n", x - &vertex[0], y - &vertex[0], eset.count({i, ind(y)}) ? elabel.c_str() : "");
+            }
+        }
+        fprintf(f, "}\n");
+    }
+};

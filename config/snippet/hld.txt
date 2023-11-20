@@ -1,0 +1,27 @@
+    vector<int> rank;
+    void decomposition() {
+        int total = 0;
+        rank.resize(n);
+        function<void(node*, node*)> dfs = [&](node *x, node *top) {
+            vertex[ind(x)].dfn = total, rank[total++] = ind(x);
+            x->top = top;
+            if (x->heavy) dfs(x->heavy, top);
+            for (auto y: x->ch) {
+                if (y == x->heavy) continue;
+                dfs(y, y);
+                if (!x->heavy || y->size > x->heavy->size) x->heavy = y;
+            }
+        };
+        dfs(root, root);
+    }
+    vector<pair<int, int>> path(int u, int v) {
+        vector<pair<int, int>> res;
+        node *x = &vertex[u], *y = &vertex[v];
+        while (x->top->depth != y->top->depth) {
+            if (x->top->depth < y->top->depth) swap(x, y);
+            res.push_back({x->top->dfn, x->dfn});
+            x = x->top->parent;
+        }
+        res.push_back({min(x->dfn, y->dfn), max(x->dfn, y->dfn)});
+        return res;
+    }

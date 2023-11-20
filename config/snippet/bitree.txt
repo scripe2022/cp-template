@@ -1,0 +1,17 @@
+struct bitree {
+    int n;
+    vector<vector<int>> c;
+    vector<int> sum;
+    bitree(vector<int> &a) {
+        n = sz(a); sum.push_back(0);
+        rep(i, 0, n) sum.push_back(sum[i] + a[i]);
+        c.resize(2, vector<int>(n+1, 0));
+    }
+    int lowbit(int x) {return x & (-x); }
+    void add(int b, int x, int y) {for (; x <= n; x += lowbit(x)) c[b][x] += y; }
+    int get(int b, int x) {int ans = 0; for (; x; x -= lowbit(x)) ans += c[b][x]; return ans; }
+    void modify(int p, int k) {modify(p, p, k); }
+    void modify(int l, int r, int k) {add(0, l+1, k); add(0, r+2, -k); add(1, l+1, (l+1)*k); add(1, r+2, -(r+2)*k); }
+    int query(int p) {return query(p, p); }
+    int query(int l, int r) {int ans = sum[r+1] + (r+2)*get(0, r+1) - get(1, r+1); ans -= sum[l] + (l+1)*get(0, l) - get(1, l); return ans; }
+};

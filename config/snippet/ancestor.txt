@@ -1,0 +1,6 @@
+    vector<vector<int>> ancestor() {
+        vector<vector<int>> p(n, vector<int>(log2(n) + 1));
+        rep(i, 0, n) p[i][0] = vertex[i].parent ? ind(vertex[i].parent) : -1;
+        rep(j, 1, log2(n)+1) rep(i, 0, n) p[i][j] = ~p[i][j-1] ? p[p[i][j-1]][j-1] : -1;
+        return p;
+    }

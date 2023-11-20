@@ -1,0 +1,18 @@
+template <typename T> int corcomp(vector<T> &a, int index = 0, function<int(T)> get = [](int x) {return x; }, function<void(T&, int)> set = [](T &x, int y) {x = y; }) {
+    int maxv = 0;
+    vector<pair<T, int>> l(sz(a));
+    vector<pair<int, int>> r(sz(a));
+    rep(i, 0, sz(a)) l[i] = {a[i], i};
+    sort(l.begin(), l.end(), [&get](pair<T, int> x, pair<T, int> y) {
+        return get(x.first) < get(y.first);
+    });
+    r[0] = {l[0].second, 0};
+    rep(i, 1, sz(a)) {
+        r[i].first = l[i].second;
+        r[i].second = r[i-1].second + (get(l[i].first) != get(l[i-1].first));
+    }
+    maxv = r.back().second;
+    sort(r.begin(), r.end());
+    rep(i, 0, sz(a)) set(a[i], r[i].second + index);
+    return maxv + index;
+}

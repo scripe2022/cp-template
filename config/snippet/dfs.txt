@@ -1,0 +1,13 @@
+    void dfs() {
+        vector<int> depth(n, -1);
+        vector<vector<int>> back(n);
+        function<void(int, int)> rec = [&](int u, int d) {
+            depth[u] = d;
+            for (auto &edge: e[u]) {
+                int v = edge.v;
+                if (!~depth[v]) rec(v, d+1);
+                else if (d - depth[v] > 1) back[u].push_back(v);
+            }
+        };
+        rep(i, 0, n) if (!~depth[i]) rec(i, 0);
+    }

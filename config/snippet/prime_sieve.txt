@@ -1,0 +1,12 @@
+    vector<bool> prime_sieve(long long N) {
+        vector<long long> p_(N+1, 0);
+        vector<bool> is_prime_(N+1, 1);
+        for (int i = 2, t = 0; i < N; ++i) {
+            if (is_prime_[i]) p_[t++] = i;
+            for (int j = 0; j < t && i*p_[j] < MAXN; ++j) {
+                is_prime_[i*p_[j]] = 0;
+                if (!(i % p_[j])) break;
+            }
+        }
+        return is_prime_;
+    }

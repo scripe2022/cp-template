@@ -1,0 +1,11 @@
+vector<int> i2p(int n, int k, int base = 0) {
+    vector<int> a(n), f(n);
+    rep(i, 0, n) f[i] = i;
+    for (int i = 0, m = k, ind; i < n; ++i) {
+        ind = m % (n-i);
+        m /= (n-i);
+        a[i] = f[ind] + base;
+        f[ind] = f[n-i-1];
+    }
+    return a;
+}

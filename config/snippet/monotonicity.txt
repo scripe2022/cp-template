@@ -1,0 +1,30 @@
+// update(i, j) dp[i] = {dp[j] + calc(j, i)}
+//     if update return newvalue, else return NaN
+// dp[L...R], dp[L] in {itvl}, dp[R] in {itvr}
+void monotonicity(vector<int> &dp, int L, int R, pair<int, int> itvl, pair<int, int> itvr, auto &update) {
+    vector<int> target(R+1, -1);
+    rep(i, itvl.first, itvl.second + 1) {
+        int v = update(L, i);
+        if (v == NaN) continue;
+        dp[L] = v, target[L] = i;
+    }
+    rep(i, itvr.first, itvr.second + 1) {
+        int v = update(R, i);
+        if (v == NaN) continue;
+        dp[R] = v, target[R] = i;
+    }
+    function<void(int, int, int, int)> solve = [&update, &target, &dp, &solve](int l, int r, int low, int high) {
+        if (l > r) return;
+        int mid = (l + r) / 2;
+        if (!~target[mid]) {
+            rep(i, low, high + 1) {
+                int v = update(mid, i);
+                if (v == NaN) continue;
+                dp[mid] = v, target[mid] = i;
+            }
+        }
+        solve(l, mid - 1, low, target[mid]);
+        solve(mid + 1, r, target[mid], high);
+    };
+    solve(L, R, target[L], target[R]);
+}

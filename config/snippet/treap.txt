@@ -1,0 +1,117 @@
+template <class T> struct treap {
+    struct node {
+        node *ch[2];
+        int rd, size;
+        T val;
+    };
+    node *root = nullptr;
+    T DEFAULT_VALUE;
+    vector<node> pool;
+    treap(int N) {
+        pool.resize(N);
+    }
+    int total = 0;
+    node *newnode(T val) {
+        node *x = &pool[total++];
+        x->val = val;
+        x->rd = rand();
+        x->size = 1;
+        return x;
+    }
+    int getsize(node *x) {return x ? x->size : 0; }
+    void pushup(node *x) {
+        if (!x) return;
+        x->size = getsize(x->ch[0]) + getsize(x->ch[1]) + 1;
+        T lc = x->ch[0] ? x->ch[0]->val : DEFAULT_VALUE;
+        T rc = x->ch[1] ? x->ch[1]->val : DEFAULT_VALUE;
+        x->val.pushup(lc, rc);
+    }
+    void pushdown(node *x) {
+        if (!x) return;
+        if (x->ch[0]) x->ch[0]->val.pushdown(x->val);
+        if (x->ch[1]) x->ch[1]->val.pushdown(x->val);
+        x->val.clear();
+    }
+    pair<node*, node*> split(node *x, int size) {
+        if (!x) return {nullptr, nullptr};
+        pushdown(x);
+        if (size <= getsize(x->ch[0])) {
+            auto [lc, rc] = split(x->ch[0], size);
+            x->ch[0] = rc;
+            pushup(x);
+            return {lc, x};
+        }
+        auto [lc, rc] = split(x->ch[1], size - getsize(x->ch[0]) - 1);
+        x->ch[1] = lc;
+        pushup(x);
+        return {x, rc};
+    }
+    node *merge(node *x, node *y) {
+        if (!x && !y) return nullptr;
+        if (!x) return y;
+        if (!y) return x;
+        pushdown(x), pushdown(y);
+        if (x->rd < y->rd) {
+            x->ch[1] = merge(x->ch[1], y);
+            pushup(x);
+            return x;
+        }
+        y->ch[0] = merge(x, y->ch[0]);
+        pushup(y);
+        return y;
+    }
+    void insert(T val, int rank) {
+        auto [l, r] = split(root, rank);
+        node *mid = merge(l, newnode(val));
+        root = merge(mid, r);
+    }
+    vector<T> inorder() {
+        vector<T> res;
+        function<void(node*)> dfs = [&](node *x) {
+            if (!x) return;
+            pushdown(x);
+            dfs(x->ch[0]);
+            res.push_back(x->val);
+            dfs(x->ch[1]);
+        };
+        dfs(root);
+        return res;
+    }
+    tuple<node*, node*, node*> interval(int l, int r) {
+        auto [L, y] = split(root, r+1);
+        auto [x, mid] = split(L, l);
+        return {x, mid, y};
+    }
+    void graphviz_dump(string filename = "graph.dot") {
+        FILE *f = fopen(filename.c_str(), "w");
+        fprintf(f, "digraph {\n");
+        rep(i, 0, total) {
+            node *x = &pool[i];
+            fprintf(f, "%lld[label=\"", i);
+            vector<string> desired = {
+                "size=" + to_string(x->size),
+            };
+            if (sz(desired)) fprintf(f, "%s", desired[0].c_str());
+            rep(j, 1, sz(desired)) fprintf(f, " | %s", desired[j].c_str());
+            fprintf(f, "\" shape=\"record\"];\n");
+        }
+        rep(i, 0, total) {
+            node *x = &pool[i];
+            if (x->ch[0]) fprintf(f, "    %lld -> %ld[label=\"L\"];\n", i, x->ch[0] - &pool[0]);
+            if (x->ch[1]) fprintf(f, "    %lld -> %ld[label=\"R\"];\n", i, x->ch[1] - &pool[0]);
+        }
+        fprintf(f, "}\n");
+    }
+};
+    // struct value {
+    //     int c = 0, sum = 0, rev = 0;
+    //     void pushup(value &lc, value &rc) {
+    //         sum = lc.sum + rc.sum + c;
+    //     }
+    //     void pushdown(value &parent) {
+    //         rev ^= parent.rev;
+    //     }
+    //     void clear() {
+    //         rev = 0;
+    //     }
+    // };

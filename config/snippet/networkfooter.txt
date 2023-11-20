@@ -1,0 +1,14 @@
+    void graphviz_dump(int plus = 0, string filename = "graph.dot") {
+        FILE *f = fopen(filename.c_str(), "w");
+        fprintf(f, "digraph {\n    ");
+        rep(i, 0, n) fprintf(f, "%lld%s", i+plus, i==n-1 ? ";\n" : " ");
+        rep(u, 0, n) {
+            for (auto &edge: e[u]) {
+                int v = edge.v, cap = edge.cap;
+                if (!cap) continue;
+                fprintf(f, "    %lld -> %lld [label=\"[%lld/%lld]\\n%lld\"];\n", u+plus, v+plus, edge.f, edge.cap, edge.w);
+            }
+        }
+        fprintf(f, "}\n");
+    }
+};
