@@ -1,12 +1,10 @@
 <template>
-    <client-only>
     <div class="code-block">
         <highlightjs language="cpp" :code="sourceCode" />
         <div class="copy-icon" @click="copyCode">
             <font-awesome-icon :icon="['fas', 'copy']" />
         </div>
     </div>
-    </client-only>
 </template>
 
 <style>
