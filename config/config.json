@@ -322,6 +322,10 @@
             {
                 "id": "int2permutation",
                 "label": "Integer to Permutation"
+            },
+            {
+                "id": "freqtable",
+                "label": "Frequency Table"
             }
         ]
     },

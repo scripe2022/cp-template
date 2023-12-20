@@ -1,10 +1,12 @@
 <template>
+    <client-only>
     <div class="code-block">
         <highlightjs language="cpp" :code="sourceCode" />
         <div class="copy-icon" @click="copyCode">
             <font-awesome-icon :icon="['fas', 'copy']" />
         </div>
     </div>
+    </client-only>
 </template>
 
 <style>
@@ -73,24 +75,24 @@
             }
             else {
                 if (f.includes(node.obj.id)) {
-                    tree[node.cat].push({id: node.obj.id, url: '../config/snippet/' + node.obj.id + '.txt'});
+                    tree[node.cat].push({id: node.obj.id, url: '/snippet/' + node.obj.id + '.txt'});
                 }
             }
         }
         if (tree['graph'].length > 0) {
-            tree['graph'].unshift({id: 'graphheader', url: '../config/snippet/graphheader.txt'});
-            tree['graph'].push({id: 'graphfooter', url: '../config/snippet/graphfooter.txt'});
+            tree['graph'].unshift({id: 'graphheader', url: '/snippet/graphheader.txt'});
+            tree['graph'].push({id: 'graphfooter', url: '/snippet/graphfooter.txt'});
         }
         if (tree['network'].length > 0) {
-            tree['network'].unshift({id: 'networkheader', url: '../config/snippet/networkheader.txt'});
-            tree['network'].push({id: 'networkfooter', url: '../config/snippet/networkfooter.txt'});
+            tree['network'].unshift({id: 'networkheader', url: '/snippet/networkheader.txt'});
+            tree['network'].push({id: 'networkfooter', url: '/snippet/networkfooter.txt'});
         }
         if (tree['tree'].length > 0) {
-            tree['tree'].unshift({id: 'treeheader', url: '../config/snippet/treeheader.txt'});
-            tree['tree'].push({id: 'treefooter', url: '../config/snippet/treefooter.txt'});
+            tree['tree'].unshift({id: 'treeheader', url: '/snippet/treeheader.txt'});
+            tree['tree'].push({id: 'treefooter', url: '/snippet/treefooter.txt'});
             if (tree['tree'].includes('lca') && tree['tree'].includes('ancestor')) {
-                tree['tree'].push({id: 'lcaheader', url: '../config/snippet/lcaheader.txt'});
-                tree['tree'].push({id: 'lcafooter', url: '../config/snippet/lcafooter.txt'});
+                tree['tree'].push({id: 'lcaheader', url: '/snippet/lcaheader.txt'});
+                tree['tree'].push({id: 'lcafooter', url: '/snippet/lcafooter.txt'});
             }
         }
         if (tree['math'].length > 0) {
@@ -102,13 +104,13 @@
                 }
             }
             if (remained) {
-                // tree['math'].unshift({id: 'mathheader', url: '../config/snippet/mathheader.txt'});
-                tree['math'].push({id: 'mathfooter', url: '../config/snippet/mathfooter.txt'});
+                // tree['math'].unshift({id: 'mathheader', url: '/snippet/mathheader.txt'});
+                tree['math'].push({id: 'mathfooter', url: '/snippet/mathfooter.txt'});
                 let i = 0;
                 while (tree['math'][i].id == 'modint' || tree['math'][i].id == 'modint_dynamic') ++i;
                 tree['math'] = [
                     ...tree['math'].slice(0, i),
-                    {id: 'mathheader', url: '../config/snippet/mathheader.txt'},
+                    {id: 'mathheader', url: '/snippet/mathheader.txt'},
                     ...tree['math'].slice(i)
                 ];
             }
@@ -125,13 +127,13 @@
                 }
             }
             if (remained) {
-                tree['str'].push({id: 'strfooter', url: '../config/snippet/strfooter.txt'});
+                tree['str'].push({id: 'strfooter', url: '/snippet/strfooter.txt'});
                 let i = 0;
                 while (reserved.includes(tree['str'][i].id)) ++i;
                 while (tree['str'][i].id == 'trie' || tree['str'][i].id == 'acauto') ++i;
                 tree['str'] = [
                     ...tree['str'].slice(0, i),
-                    {id: 'strheader', url: '../config/snippet/strheader.txt'},
+                    {id: 'strheader', url: '/snippet/strheader.txt'},
                     ...tree['str'].slice(i)
                 ];
             }
@@ -163,6 +165,7 @@
 <script>
     import hljsVuePlugin from "@highlightjs/vue-plugin";
     const highlightjs = hljsVuePlugin.component;
+    console.log(highlightjs);
 
     export default {
         components: {
